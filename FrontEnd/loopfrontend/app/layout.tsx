@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from './components/navbar';
+import Footer from './components/footer';
 import React from "react";
 
 const geistSans = Geist({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }:{children:React.ReactNode}) {
       <body>
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   )

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import Logo from '../assets/logo.png'
 
 const links = [
   { href: '/', label: 'Loop' },
@@ -21,7 +22,7 @@ export default function Navbar() {
 
         {/* Logo balra */}
         <Link href="/">
-          <Image src="/logo.png" alt="Loop logo" height={55} width={55} />
+          <Image src={Logo} alt="Loop logo" height={55} width={55} />
         </Link>
 
         {/* Linkek középen */}
