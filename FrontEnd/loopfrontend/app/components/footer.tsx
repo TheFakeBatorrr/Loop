@@ -1,6 +1,7 @@
 import { create } from "domain"
 import Logo from '../assets/logo.png'
 import Image from "next/image"
+import { FaInstagram, FaFacebook, FaXTwitter } from 'react-icons/fa6'
 
 export default function footer(){
 
@@ -17,7 +18,11 @@ export default function footer(){
                     </div>
                     <div>
                         <p>Kövesd a Loop-ot</p>
-                        !ikonok!
+                        <div className="flex gap-4 justify-center">
+                            <a href="#"><FaInstagram size={24} /></a>
+                            <a href="#"><FaFacebook size={24} /></a>
+                            <a href="#"><FaXTwitter size={24} /></a>
+                        </div>
                     </div>
                     <div>
                         <p>Szeretné, hogy a Loop iskolájában is segítse a diákok életét?</p>
