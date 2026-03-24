@@ -17,7 +17,7 @@ export default function Navbar() {
   const pathname = usePathname()
 
   return (
-    <nav className="bg-gray-100 border-b-2 border-[#6034e3] mb-3 relative">
+    <nav className="bg-gray-100 border-b-2 border-[#6034e3] relative">
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
 
         {/* Logo balra */}
