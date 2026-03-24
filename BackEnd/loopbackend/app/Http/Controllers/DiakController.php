@@ -38,13 +38,7 @@ class DiakController extends Controller
             "max" => ":attribute :max hoszzú lehet!",
             "min" => ":attribute :min hosszunak kell lennie!",
             "email" => ":attribute mező email típusu-nak kell lenni!",
-            "boolean" => ":attribute boolean típusu",
-            "nev" => ":attribute megadása kötelező!",
-            "username" => ":attribute megadása kötelező!",
-            "password" => ":attribute megadása kötelező!",
-            "osztaly" => ":attribute megadása kötelező!",
-            "kezdo_evfolyam" => ":attribute megadása kötelező!",
-            "idos" => ":attribute kiválasztása kötelező!",         
+            "boolean" => ":attribute boolean típusu",        
         ]); 
 
         $data = Diak::create($request->all());

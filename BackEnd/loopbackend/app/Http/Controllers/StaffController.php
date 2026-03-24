@@ -35,9 +35,6 @@ class StaffController extends Controller
             "min" => ":attribute :min hosszunak kell lennie!",
             "exists" => ":attribute nem létezik!",
             "date" => ":attribute csak dátum lehet!",
-            "diak_id" => ":attribute nem létezik!",
-            "esemeny_id" => ":attribute nem létezik!",
-            "szerep" => ":attribute megadása kötelező!",
         ]); 
 
         $data = Staff::create($request->all());

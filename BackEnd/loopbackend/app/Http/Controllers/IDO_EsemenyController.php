@@ -37,11 +37,6 @@ class IDO_EsemenyController extends Controller
             "min" => ":attribute :min hosszunak kell lennie!",
             "exists" => ":attribute nem létezik!",
             "date" => ":attribute csak dátum lehet!",
-            "esemeny_id" => ":attribute nem létezik!",
-            "foszervezo" => ":attribute megadása kötelező!",
-            "foszervezo_id" => ":attribute nem létezik!",
-            "bevetel" => ":attribute megadása kötelező!",
-            "kiadás" => ":attribute megadása kötelező!",
         ]); 
 
         $data = IDO_Esemeny::create($request->all());

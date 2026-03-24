@@ -31,8 +31,7 @@ class AdminController extends Controller
             "string" => ":attribute mező szöveges lehet csak!",
             "max" => ":attribute :max hoszzú lehet!",
             "min" => ":attribute :min hosszunak kell lennie!",
-            "username" => ":attribute megadása kötelező!",
-            "password" => ":attribute megadása kötelező!"
+            
         ]); 
 
         $data = Admin::create($request->all());

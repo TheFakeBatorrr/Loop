@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Esemeny;
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class EsemenyController extends Controller
+class DiakController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $esemeny = Esemeny::all();
-        return response()->json($esemeny, 200, options:JSON_UNESCAPED_UNICODE);
+        $diak = User::all();
+        return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -23,26 +23,28 @@ class EsemenyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "tipus" => "required|string|max:120",
-            "tema" => "required|string|max:120",
-            "cel_evfolyam" => "required|string|max:10",
-            "datum" => "required|date",
-            "terem" => "required|string|max:255",     
-            "max_letszam" => "required|integer",
+            "nev" => "required|string|max:255",
+            "email" => "required|string|",
+            "username" => "required|string|max:255",
+            "password" => "required|min:8",
+            "osztaly" => "required|string|max:5",
+            "kezdo_evfolyam" => "required|string|max:15",
+            "idos" => "required|boolean|",
+
         ],
         [
             "required" => ":attribute megadása kötelező!",
             "string" => ":attribute mező szöveges lehet csak!",
-            "integer"=> ":attribute mező szám típusu-nak kell lennie!",
             "max" => ":attribute :max hoszzú lehet!",
             "min" => ":attribute :min hosszunak kell lennie!",
-            "date" => ":attribute csak dátum lehet!",
+            "email" => ":attribute mező email típusu-nak kell lenni!",
+            "boolean" => ":attribute boolean típusu",        
         ]); 
 
-        $data = Esemeny::create($request->all());
+        $data = User::create($request->all());
 
         return response()->json([
-            "uzenet"=> "Sikeres esemény létrehozás!",
+            "uzenet"=> "Sikeres diák feltöltés!",
         ],200, options:JSON_UNESCAPED_UNICODE);
     }
 
@@ -67,9 +69,9 @@ class EsemenyController extends Controller
      */
     public function destroy(string $id)
     {
-        $esemeny = Esemeny::find($id);
+        $diak = User::find($id);
 
-        $esemeny->delete();
+        $diak->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",

@@ -37,11 +37,6 @@ class ErtekelesController extends Controller
             "min" => ":attribute :min hosszunak kell lennie!",
             "exists" => ":attribute nem létezik!",
             "date" => ":attribute csak dátum lehet!",
-            "esemeny_id" => ":attribute megadása kötelező!",
-            "diak_id" => ":attribute megadása kötelező!",
-            "ertekeles" => ":attribute megadása kötelező!",
-            "szoveges" => ":attribute megadása kötelező!",
-            "datum" => ":attribute megadása kötelező!",
         ]); 
 
         $data = Ertekeles::create($request->all());

@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
 
 class User extends Authenticatable
 {
@@ -21,6 +23,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        "nev",
+        "osztaly",
+        "kezdo_evfolyam",
+        "idos"
     ];
 
     /**
@@ -45,4 +51,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+     public function ertekelesek(){
+        return $this->belongsToMany(Ertekeles::class);
+    }
+
+    public function staff(){
+        return $this->belongsTo(Staff::class);
+    }
+
 }

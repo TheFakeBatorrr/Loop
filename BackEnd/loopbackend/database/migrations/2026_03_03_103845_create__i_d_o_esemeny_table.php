@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('_i_d_o_esemeny', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("esemeny_id");
+            $table->foreignId("ido_esemeny_id")->constrained("esemeny","id","ido_esemeny_id");
             $table->string("foszervezo");
-            $table->foreignId("foszervezo_id");
+            $table->foreignId("foszervezo_id")->constrained("diak","id","foszervezo_id");
             $table->string("bevetel");
             $table->string("kiadás");
             $table->timestamps();
