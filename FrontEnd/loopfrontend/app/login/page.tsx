@@ -12,9 +12,10 @@ export default function Login(){
     const [password,setPassword] = useState<string>("")
     const [user, setUser] = useState<string>("")
 
-    const isFilled = email != "" && password != ""
+    const canLogin = email != "" && password != ""
     const canRegister = email != "" && password != "" && user != ""
     
+    const logged = false
     
     return (
         <main className="min-h-screen bg-[#6034e3] flex items-center justify-center">
@@ -56,11 +57,11 @@ export default function Login(){
                     />
 
                     <button className={`bg-white text-[#6034e3] font-bold py-3 rounded-xl transition-all duration-500
-                        ${isFilled ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                        ${canLogin ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
                         Bejelentkezés
                     </button>
 
-                    <button onClick={() => {setView('register'); setEmail('');setPassword('');setUser('')}} className={`py-2 rounded-xl`}>
+                    <button onClick={() => {setView('register'); setEmail('');setPassword('');setUser('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
                         Elősször regisztrálok
                     </button>
                 </div>
@@ -98,10 +99,18 @@ export default function Login(){
                         Regisztráció
                     </button>
 
-                    <button onClick={() => {setView('login'); setEmail('');setPassword('');setUser('')}} className={`py-2 rounded-xl`}>
+                    <button onClick={() => {setView('login'); setEmail('');setPassword('');setUser('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
                         Inkább bejelentkezek
                     </button>
                 </div>
+            )}
+
+            {view == 'profile' && (
+
+                <div className="fade-in login-box bg-white/10 rounded-2xl p-10 flex flex-col gap-6 w-full max-w-md">
+
+                </div>
+
             )}
 
         </main>
