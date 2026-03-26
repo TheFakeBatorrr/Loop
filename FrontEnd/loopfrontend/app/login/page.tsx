@@ -62,7 +62,7 @@ export default function Login(){
                     </button>
 
                     <button onClick={() => {setView('register'); setEmail('');setPassword('');setUser('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
-                        Elősször regisztrálok
+                        Először regisztrálok
                     </button>
                 </div>
             )}

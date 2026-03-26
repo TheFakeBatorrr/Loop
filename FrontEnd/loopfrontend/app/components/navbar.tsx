@@ -10,7 +10,7 @@ import { useTheme } from './ThemeProvider'
 const links = [
   { href: '/main', label: 'Loop' },
   { href: '/about', label: 'About' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/sellout', label: 'Fedezd fel a Loop-ot' },
 ]
 
 export default function Navbar() {
