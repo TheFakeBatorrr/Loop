@@ -1,6 +1,5 @@
 'use client'
 
-import { Label } from '@headlessui/react'
 import { useEffect, useRef, useState } from 'react'
 
 function useInView(threshold = 0.2) {
@@ -42,23 +41,36 @@ function Counter({ target, suffix = '' }: { target: number, suffix?: string }) {
   return <span ref={ref}>{count}{suffix}</span>
 }
 
-export default function Sellout() {
+type Bubble = { w: number, h: number, top: number, left: number, dur: number }
+
+export default function SelloutPage() {
+  const [bubbles, setBubbles] = useState<Bubble[]>([])
+
+  useEffect(() => {
+    setBubbles([...Array(20)].map(() => ({
+      w: Math.random() * 200 + 50,
+      h: Math.random() * 200 + 50,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      dur: Math.random() * 4 + 3,
+    })))
+  }, [])
+
   return (
     <main className="bg-[#fafafa] text-[#171717] overflow-x-hidden">
 
       {/* HERO */}
       <section className="min-h-screen bg-[#6034e3] flex flex-col items-center justify-center text-white text-center px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          {[...Array(20)].map((_, i) => (
+          {bubbles.map((b, i) => (
             <div key={i} className="absolute rounded-full bg-white"
               style={{
-                width: Math.random() * 200 + 50 + 'px',
-                height: Math.random() * 200 + 50 + 'px',
-                top: Math.random() * 100 + '%',
-                left: Math.random() * 100 + '%',
+                width: b.w + 'px',
+                height: b.h + 'px',
+                top: b.top + '%',
+                left: b.left + '%',
                 transform: 'translate(-50%, -50%)',
-                animation: `pulse ${Math.random() * 4 + 3}s ease-in-out infinite`,
-                animationDelay: Math.random() * 2 + 's'
+                animation: `pulse ${b.dur}s ease-in-out infinite`,
               }}
             />
           ))}
@@ -78,11 +90,11 @@ export default function Sellout() {
 
       {/* SZÁMOK */}
       <section className="bg-[#6034e3] pb-16 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-3 md:grid-cols-3 gap-8 text-center text-white">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-8 text-center text-white">
           {[
             { target: 24, suffix: '/7', label: 'Elérhető' },
-            { target: 3, suffix: ' perc', label: 'Telepítési idő' },
-            { target: 1, suffix: ' iskola', label:'Már használja' },
+            { target: 3, suffix: ' perc', label: 'Villámgyors telepítés' },
+            { target: 1, suffix: ' iskola', label: 'Már használja' },
           ].map((item, i) => (
             <AnimatedSection key={i}>
               <div className="text-5xl font-black"><Counter target={item.target} suffix={item.suffix} /></div>

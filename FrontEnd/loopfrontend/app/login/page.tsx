@@ -17,7 +17,18 @@ export default function Login(){
     
     const logged = false
 
-    
+    const login = async () => {
+        const response = await fetch('http://127.0.0.1:8000/api/login', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+            },
+            body: JSON.stringify({ email, password }),
+        })
+        const data = await response.json()
+        console.log(data)
+    }
     
     return (
         <main className="min-h-screen bg-[#6034e3] flex items-center justify-center">
@@ -59,7 +70,8 @@ export default function Login(){
                     />
 
                     <button className={`bg-white text-[#6034e3] font-bold py-3 rounded-xl transition-all duration-500
-                        ${canLogin ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                        ${canLogin ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+                        onClick={login}>
                         Bejelentkezés
                     </button>
 
