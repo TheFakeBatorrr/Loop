@@ -8,9 +8,8 @@ import Logo from '../assets/logo.png'
 import { useTheme } from './ThemeProvider'
 
 const links = [
-  { href: '/main', label: 'Loop' },
-  { href: '/about', label: 'About' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/main', label: 'Főoldal' },
+  { href: '/sellout', label: 'Fedezd fel a Loop-ot' },
 ]
 
 export default function Navbar() {
@@ -20,7 +19,7 @@ export default function Navbar() {
   const {theme, toggle } = useTheme()
 
   return (
-    <nav className="bg-gray-100 border-b-2 border-[#6034e3] relative">
+    <nav className="bg-[#fafafa] border-b-2 border-[#6034e3] relative">
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
 
         {/* Logo balra */}
