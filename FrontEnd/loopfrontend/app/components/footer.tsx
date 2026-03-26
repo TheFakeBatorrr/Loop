@@ -1,5 +1,6 @@
 import Logo from '../assets/logo.png'
 import Image from "next/image"
+import Link from 'next/link'
 import { FaInstagram, FaFacebook, FaXTwitter } from 'react-icons/fa6'
 
 export default function footer(){
@@ -27,7 +28,7 @@ export default function footer(){
                         <p className='mt-3'>Szeretné, hogy a Loop iskolájában is segítse a diákok életét?</p>
                         <a className="text-white underline hover:text-[#FFD700] transition-colors duration-300"  href="mailto:info@loop.hu">Vegye fel velünk a kapcsolatot!</a>
                         <br />
-                        <a className="text-white underline hover:text-[#FFD700] transition-colors duration-300" href="">Ismerje meg a Loop-ot</a>
+                        <Link className="text-white underline hover:text-[#FFD700] transition-colors duration-300" href="/sellout">Ismerje meg a Loop-ot</Link>
                     </div>
 
                 </div>
