@@ -7,6 +7,8 @@ export default function Sellout() {
 
             <h1>SELLOUT</h1>
 
+            <div> gien ing igne</div>
+
         </main>
     )
 }
