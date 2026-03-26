@@ -16,6 +16,8 @@ export default function Login(){
     const canRegister = email != "" && password != "" && user != ""
     
     const logged = false
+
+    
     
     return (
         <main className="min-h-screen bg-[#6034e3] flex items-center justify-center">
