@@ -5,9 +5,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import Logo from '../assets/logo.png'
+import { useTheme } from './ThemeProvider'
 
 const links = [
-  { href: '/', label: 'Loop' },
+  { href: '/main', label: 'Loop' },
   { href: '/about', label: 'About' },
   { href: '/pricing', label: 'Pricing' },
 ]
@@ -16,8 +17,10 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
+  const {theme, toggle } = useTheme()
+
   return (
-    <nav className="bg-gray-100 border-b-2 border-[#6034e3] mb-3 relative">
+    <nav className="bg-gray-100 border-b-2 border-[#6034e3] relative">
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
 
         {/* Logo balra */}
@@ -41,6 +44,9 @@ export default function Navbar() {
 
         {/* Login gomb jobbra */}
         <div className="hidden md:flex ml-auto">
+          <button className='mx-3 bg-[#6034e3] rounded-xl p-2' onClick={toggle}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           <Link
             href="/login"
             className="border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg
@@ -64,7 +70,7 @@ export default function Navbar() {
 
       {/* Mobil menü */}
       {open && (
-        <div className="md:hidden flex flex-col px-4 pb-4 gap-3">
+        <div className="md:hidden text-center flex flex-col px-4 pb-4 gap-3">
           {links.map((link) => (
             <Link
               key={link.href}
@@ -75,9 +81,12 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <button className='bg-[#6034e3] rounded-xl  mx-auto w-12 p-2' onClick={toggle}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           <Link
             href="/login"
-            className="border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg w-fit
+            className="mx-auto border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg w-fit
               hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
           >
             Bejelentkezés
