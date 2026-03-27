@@ -5,11 +5,15 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import Logo from '../assets/logo.png'
+import { useAuth } from './AuthProvider'
 import { useTheme } from './ThemeProvider'
 
+const { user } = useAuth()
+
 const links = [
-  { href: '/main', label: 'Főoldal' },
-  { href: '/sellout', label: 'Fedezd fel a Loop-ot' },
+  { href: '/main', label: 'Loop' },
+  ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+  { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
 ]
 
 export default function Navbar() {
@@ -17,6 +21,7 @@ export default function Navbar() {
   const pathname = usePathname()
 
   const {theme, toggle } = useTheme()
+  
 
   return (
     <nav className="bg-[#fafafa] border-b-2 border-[#6034e3] relative">
@@ -46,13 +51,26 @@ export default function Navbar() {
           <button className='mx-3 bg-[#6034e3] rounded-xl p-2' onClick={toggle}>
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <Link
+          {user ? 
+          (
+            <Link
             href="/login"
             className="border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg
-              hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
-          >
+            hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
+            >
+              Profil
+            </Link>
+          )
+          :
+          (
+            <Link
+            href="/login"
+            className="border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg
+            hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
+            >
             Bejelentkezés
           </Link>
+          )}
         </div>
 
         {/* Hamburger - mobil */}

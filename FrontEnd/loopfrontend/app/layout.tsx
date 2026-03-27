@@ -5,6 +5,7 @@ import Navbar from './components/navbar';
 import Footer from './components/footer';
 import React from "react";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { AuthProvider } from './components/AuthProvider'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,9 +27,11 @@ export default function RootLayout({ children }:{children:React.ReactNode}) {
     <html lang="hu">
       <body>
         <ThemeProvider>
-          <Navbar />
-          {children}
-          <Footer />
+          <AuthProvider>
+            <Navbar />
+            {children}
+            <Footer />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

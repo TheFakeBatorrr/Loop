@@ -1,8 +1,11 @@
 'use client'
 import { useState } from "react"
+import { useAuth } from "../components/AuthProvider"
 
 type View = 'choice' | 'register' | 'login' | 'profile'
- 
+
+const { user } = useAuth()
+
 export default function Login(){
 
     const [view,setView] = useState<View>('choice')
@@ -15,7 +18,11 @@ export default function Login(){
     const canLogin = email != "" && password != ""
     const canRegister = email != "" && password != "" && user != ""
     
-    const logged = false
+    if(user)
+    {
+        setView('profile');
+    }
+    
 
     const login = async () => {
         const response = await fetch('http://127.0.0.1:8000/api/login', {
