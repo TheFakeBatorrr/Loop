@@ -1,10 +1,14 @@
 'use client'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useAuth } from "../components/AuthProvider"
 
 type View = 'choice' | 'register' | 'login' | 'profile'
 
-const { user } = useAuth()
+const users : {
+        email:string,
+        username:string,
+        password:string
+    }[] = []
 
 export default function Login(){
 
@@ -13,18 +17,23 @@ export default function Login(){
     
     const [email,setEmail] = useState<string>("")
     const [password,setPassword] = useState<string>("")
-    const [user, setUser] = useState<string>("")
+    const [passagain, setPassagain] = useState<string>("")
+    const [username, setUsername] = useState<string>("")
 
     const canLogin = email != "" && password != ""
-    const canRegister = email != "" && password != "" && user != ""
+    const canRegister = email != "" && password != "" && username != "" && passagain != ""
+    const samePass = password === passagain
     
-    if(user)
-    {
-        setView('profile');
-    }
+    const { user, login: authLogin } = useAuth()
+
     
 
-    const login = async () => {
+    useEffect(() => {
+        if(user) setView('profile')
+    }, [user])
+    
+
+    const userLogin = async () => {
         const response = await fetch('http://127.0.0.1:8000/api/login', {
             method: 'POST',
             headers: {
@@ -34,7 +43,48 @@ export default function Login(){
             body: JSON.stringify({ email, password }),
         })
         const data = await response.json()
-        console.log(data)
+        authLogin(data.token, data.user)
+    }
+
+    const userRegister = async () => {
+        const response = await fetch('',{
+            method:'POST',
+            headers:{
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body:JSON.stringify({email,password})
+        })
+        const data = await response.json()
+    }
+
+    {/* Teszt Bejelentkezés funkció */}
+    const testLogin = () => {
+        if(canLogin)
+        {
+            authLogin('test-token-123', { id: 1, email: email, role: 'student' })
+        }
+        else
+        {
+            alert('Tölts ki minden adatot!')
+        }
+    }
+
+    {/* Teszt Regisztrációs funkció */}
+    const testRegister = async () => {
+        // szimulált sikeres regisztráció
+        if(samePass)
+        {
+            users.push({ username, email, password})
+            console.log('Regisztráltak: ', users)
+            setView('login')
+            setModalOpen(true)
+            
+        }
+        else
+        {
+            alert("A jelszavak nem helyesek!")
+        }
     }
     
     return (
@@ -78,11 +128,11 @@ export default function Login(){
 
                     <button className={`bg-white text-[#6034e3] font-bold py-3 rounded-xl transition-all duration-500
                         ${canLogin ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-                        onClick={login}>
+                        onClick={testLogin}>
                         Bejelentkezés
                     </button>
 
-                    <button onClick={() => {setView('register'); setEmail('');setPassword('');setUser('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
+                    <button onClick={() => {setView('register'); setEmail('');setPassword('');setUsername('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
                         Először regisztrálok
                     </button>
                 </div>
@@ -102,8 +152,8 @@ export default function Login(){
                     <input
                         type="string"
                         placeholder="Felhasználónév"
-                        value={user}
-                        onChange={e => setUser(e.target.value)}
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
                         className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
                     />
                     
@@ -115,12 +165,21 @@ export default function Login(){
                         className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
                     />
 
+                    <input
+                        type="password"
+                        placeholder="Jelszó megerősítése"
+                        value={passagain}
+                        onChange={e => setPassagain(e.target.value)}
+                        className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
+                    />
+
                     <button className={`bg-white text-[#6034e3] font-bold py-3 rounded-xl transition-all duration-500
-                        ${canRegister ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                        ${canRegister ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+                        onClick={testRegister}>
                         Regisztráció
                     </button>
 
-                    <button onClick={() => {setView('login'); setEmail('');setPassword('');setUser('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
+                    <button onClick={() => {setView('login'); setEmail('');setPassword('');setUsername('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
                         Inkább bejelentkezek
                     </button>
                 </div>
@@ -129,6 +188,11 @@ export default function Login(){
             {view == 'profile' && (
 
                 <div className="fade-in login-box bg-white/10 rounded-2xl p-10 flex flex-col gap-6 w-full max-w-md">
+                    Szia {/* Felhasználó neve*/} !nagy!
+
+                    Osztály {/* Felhasználó osztálya*/}
+                    Értékelések {/* leadott értékelések száma*/}
+                    stb.
 
                 </div>
 

@@ -8,20 +8,19 @@ import Logo from '../assets/logo.png'
 import { useAuth } from './AuthProvider'
 import { useTheme } from './ThemeProvider'
 
-const { user } = useAuth()
-
-const links = [
-  { href: '/main', label: 'Loop' },
-  ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
-  { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
-]
-
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
   const {theme, toggle } = useTheme()
+
+  const { user } = useAuth()
   
+  const links = [
+    { href: '/main', label: 'Loop' },
+    ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+    { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
+  ]
 
   return (
     <nav className="bg-[#fafafa] border-b-2 border-[#6034e3] relative">
