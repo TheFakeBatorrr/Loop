@@ -134,7 +134,7 @@ export default function Login(){
                         Bejelentkezés
                     </button>
 
-                    <button onClick={() => {setView('register'); setEmail('');setPassword('');setUsername('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
+                    <button onClick={() => {setView('register'); setEmail('');setPassword('');setUsername('')}} style={{color:"white"}} className={`py-2 rounded-xl border-white border w-fit mx-auto px-3`}>
                         Először regisztrálok
                     </button>
                 </div>
@@ -181,7 +181,7 @@ export default function Login(){
                         Regisztráció
                     </button>
 
-                    <button onClick={() => {setView('login'); setEmail('');setPassword('');setUsername('')}} style={{color:"white"}} className={`py-2 rounded-xl`}>
+                    <button onClick={() => {setView('login'); setEmail('');setPassword('');setUsername('')}} style={{color:"white"}} className={`py-2 rounded-xl border-white border w-fit mx-auto px-3`}>
                         Inkább bejelentkezek
                     </button>
                 </div>

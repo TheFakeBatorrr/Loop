@@ -7,8 +7,8 @@ import { useAuth } from '../components/AuthProvider'
 import { useTheme } from '../components/ThemeProvider'
 
 const slides = [
-  { bg: '/assets/carousel/placeholder.jpg', label: 'Gólyabál 2025' },
-  { bg: '/assets/carousel/placeholder2.jpg', label: 'Sportsnap 2025' },
+  { img: '/assets/carousel/placeholdder2.jpg', label: 'Gólyabál 2025' },
+  { img: '/assets/carousel/placeholder.jpg', label: 'Sportsnap 2025' },
 ]
 
 const topics = ['Sport', 'Kultúra', 'Tanulmány', 'Szórakozás', 'Egyéb']
@@ -53,7 +53,7 @@ export default function MainPage() {
 
       {/* HERO FELIRAT */}
       <AnimatedSection>
-        <div className="pt-16 pb-0 text-center relative z-10">
+        <div className="pt-6 mb-24 text-center relative z-10">
           <div className="bg-[#6034e3] max-w-5xl mx-auto rounded-2xl py-8 mb-[-60px]">
             <h1 className="text-7xl md:text-9xl font-black text-white tracking-tight">Loop</h1>
             <p className="text-white/70 text-lg mt-2">A diákok rendszere</p>
@@ -62,17 +62,19 @@ export default function MainPage() {
       </AnimatedSection>
 
       {/* CAROUSEL */}
-      <div className="relative w-full h-[500px] overflow-hidden">
+      <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden h-[600px] relative">
         {slides.map((slide, i) => (
           <div
             key={i}
             className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100' : 'opacity-0'}`}
-            style={{ backgroundColor: slide.bg }}
           >
-            {/* Ha képet akarsz: */}
-            {/* <Image src={slide.img} alt={slide.label} fill className="object-cover" /> */}
-            <div className="flex items-center justify-center h-full">
-              <p className="text-white text-3xl font-bold">{slide.label}</p>
+            <Image src={slide.img} alt={slide.label} fill className="object-cover" />
+            
+            {/* Label */}
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
+              <div className="bg-[#6034e3] px-6 py-2 rounded-xl">
+                <p className="text-white font-semibold text-lg">{slide.label}</p>
+              </div>
             </div>
           </div>
         ))}
