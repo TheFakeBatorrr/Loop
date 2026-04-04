@@ -4,6 +4,7 @@ import { useAuth } from "../components/AuthProvider"
 
 type View = 'choice' | 'register' | 'login' | 'profile'
 
+
 const users : {
         email:string,
         username:string,
@@ -17,6 +18,7 @@ export default function Login(){
     
     const [email,setEmail] = useState<string>("")
     const [password,setPassword] = useState<string>("")
+    
     const [passagain, setPassagain] = useState<string>("")
     const [username, setUsername] = useState<string>("")
 

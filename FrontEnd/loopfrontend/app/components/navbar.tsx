@@ -14,14 +14,14 @@ export default function Navbar() {
 
   const {theme, toggle } = useTheme()
 
-  const { user } = useAuth()
-  
-  const links = [
-    { href: '/main', label: 'Loop' },
-    ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
-    { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
-  ]
+  const {user} = useAuth()
 
+  const links = [
+  { href: '/main', label: 'Loop' },
+  ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+  { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
+]
+  
   return (
     <nav className="bg-[#fafafa] border-b-2 border-[#6034e3] relative">
       <div className="max-w-7xl mx-auto px-4 flex items-center h-16">
