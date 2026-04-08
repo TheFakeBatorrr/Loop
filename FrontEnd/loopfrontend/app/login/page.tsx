@@ -22,12 +22,14 @@ export default function Login(){
     const [passagain, setPassagain] = useState<string>("")
     const [username, setUsername] = useState<string>("")
 
-    const canLogin = email != "" && password != ""
+    const canLogin = username != "" && password != ""
     const canRegister = email != "" && password != "" && username != "" && passagain != ""
     const samePass = password === passagain
     
     const { user, login: authLogin } = useAuth()
 
+    const testusername = "asd"
+    const testpassword = "asd"
     
 
     useEffect(() => {
@@ -64,7 +66,16 @@ export default function Login(){
     const testLogin = () => {
         if(canLogin)
         {
-            authLogin('test-token-123', { id: 1, email: email, role: 'student' })
+            if(username == testusername && password == testpassword)
+            {
+                setView('profile')
+            }
+            else
+            {
+                alert('Helytelen felhasználónév vagy jelszó!')
+                setPassword("")
+                setUsername("")
+            }
         }
         else
         {
@@ -115,8 +126,8 @@ export default function Login(){
                     <input
                         type="email"
                         placeholder="Email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
                         className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
                     />
                     
@@ -187,18 +198,51 @@ export default function Login(){
                 </div>
             )}
 
-            {view == 'profile' && (
+            {view === 'profile' && (
+                <div className="w-full max-w-md flex flex-col gap-4 px-6 py-16">
 
-                <div className="fade-in login-box bg-white/10 rounded-2xl p-10 flex flex-col gap-6 w-full max-w-md">
-                    Szia {/* Felhasználó neve*/} !nagy!
+                    <h1 className="text-3xl font-black text-center text-white">
+                    Szia, Teszt Diák!
+                    </h1>
 
-                    Osztály {/* Felhasználó osztálya*/}
-                    Értékelések {/* leadott értékelések száma*/}
-                    stb.
+                    {/* Alap adatok */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                        <span className="text-gray-500 text-sm font-semibold">Osztály</span>
+                        <span className="font-bold text-[#171717]">11/A</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-500 text-sm font-semibold">Leadott értékelések</span>
+                        <span className="font-bold text-[#171717]">3 db</span>
+                    </div>
+                    </div>
+
+                    {/* IDÖ-s szekció */}
+                    <div className="bg-[#111111] rounded-2xl p-6 flex flex-col gap-3">
+                    <p className="text-white font-black text-lg mb-1">IDÖ profil</p>
+                    <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                        <span className="text-white/60 text-sm font-semibold">Staff részvételek</span>
+                        <span className="font-bold text-white">7 db</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-white/60 text-sm font-semibold">IDÖ-s évek</span>
+                        <span className="font-bold text-white">2 év</span>
+                    </div>
+                    </div>
+
+                    {/* Gombok */}
+                    <button className="bg-white text-[#6034e3] font-bold py-3 rounded-xl hover:bg-white/80 transition-all duration-300"
+                    
+                    >
+                    Értékeléseim
+                    </button>
+
+                    <button className="border-2 border-red-400 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-400 hover:text-white transition-all duration-300">
+                    Kijelentkezés
+                    </button>
 
                 </div>
-
-            )}
+                )}
 
         </main>
     )

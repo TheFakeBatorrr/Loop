@@ -6,6 +6,7 @@ import Footer from './components/footer';
 import React from "react";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from './components/AuthProvider'
+import PageTransition from './components/PageTransition'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }:{children:React.ReactNode}) {
       <body>
         <ThemeProvider>
           <AuthProvider>
+            <PageTransition/>
             <Navbar />
             {children}
             <Footer />
