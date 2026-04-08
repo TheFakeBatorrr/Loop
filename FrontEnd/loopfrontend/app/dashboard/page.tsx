@@ -62,7 +62,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          {/* Média switch */}
+          {/* Média switch
           <div className="flex items-center justify-between bg-[#fafafa] rounded-xl px-4 py-3 border-2 border-gray-100">
             <span className="font-semibold text-[#171717] text-sm">Médiába szeretnék csatlakozni</span>
             <button
@@ -73,7 +73,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
             </button>
           </div>
 
-          {/* Média extra mezők */}
+          { Média extra mezők }
           {isMedia && (
             <div className="animate-[fadeInUp_0.3s_ease_forwards]">
               <label className="text-sm font-semibold text-gray-600 mb-1 block">Média képességek</label>
@@ -90,7 +90,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
                 ))}
               </div>
             </div>
-          )}
+          )}  */}
         </div>
 
         <div className="flex gap-3 mt-6">
