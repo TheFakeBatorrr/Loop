@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('_i_d_o_esemeny', function (Blueprint $table) {
+        Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("ido_esemeny_id")->constrained("esemeny","id","ido_esemeny_id");
-            $table->string("foszervezo");
-            $table->foreignId("foszervezo_id")->constrained("users","id","foszervezo_id");
-            $table->string("bevetel");
-            $table->string("kiadas");
+            $table->foreignId("reviews_event_id")->constrained("events");
+            $table->foreignId("reviews_user_id")->constrained("users");
+            $table->integer("review");
+            $table->string("content");
+            $table->date("date");
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('_i_d_o_esemeny');
+        Schema::dropIfExists('reviews');
     }
 };

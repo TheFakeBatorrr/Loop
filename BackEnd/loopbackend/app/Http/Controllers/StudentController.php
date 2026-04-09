@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Diak;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
-class DiakController extends Controller
+
+class StudentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $diak = Diak::all();
-        return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);
+        $student = Student::all();
+        return response()->json($student, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -22,25 +22,20 @@ class DiakController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            "osztaly" => "required|string|max:5",
-            "kezdo_evfolyam" => "required|string|max:15",
-            "idos" => "required|boolean|",
-
+         $request->validate([
+            "name" => "required|string|max:120",
+            "class" => "required|string|max:5",    
         ],
         [
             "required" => ":attribute megadása kötelező!",
             "string" => ":attribute mező szöveges lehet csak!",
             "max" => ":attribute :max hoszzú lehet!",
-            "min" => ":attribute :min hosszunak kell lennie!",
-            "email" => ":attribute mező email típusu-nak kell lenni!",
-            "boolean" => ":attribute boolean típusu",        
         ]); 
 
-        $data = Diak::create($request->all());
+        $data = Student::create($request->all());
 
         return response()->json([
-            "uzenet"=> "Sikeres diák feltöltés!",
+            "uzenet"=> "Sikeres Staff jelentkezés!",
         ],200, options:JSON_UNESCAPED_UNICODE);
     }
 
@@ -65,12 +60,6 @@ class DiakController extends Controller
      */
     public function destroy(string $id)
     {
-        $diak = Diak::find($id);
-
-        $diak->delete();
-
-        return response()->json([
-            "uzenet" => "Sikeres törlés!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+        //
     }
 }

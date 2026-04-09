@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use App\Models\Review;
 
 
 class User extends Authenticatable
@@ -55,8 +56,8 @@ class User extends Authenticatable
         ];
     }
 
-     public function ertekelesek(){
-        return $this->belongsToMany(Ertekeles::class);
+     public function review(){
+        return $this->belongsToMany(Review::class);
     }
 
     public function staff(){

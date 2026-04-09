@@ -25,11 +25,7 @@ class UserController extends Controller
         $request->validate([
             "email" => "required|string|",
             "name" => "required|string|max:255",
-            "password" => "required|min:8",
-            "osztaly" => "required|string|max:5",
-            "kezdo_evfolyam" => "required|string|max:15",
-            
-
+            "password" => "required|min:8"
         ],
         [
             "required" => ":attribute megadása kötelező!",

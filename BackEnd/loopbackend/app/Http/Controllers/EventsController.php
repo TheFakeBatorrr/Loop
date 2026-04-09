@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Esemeny;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
-class EsemenyController extends Controller
+class EventController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $esemeny = Esemeny::all();
-        return response()->json($esemeny, 200, options:JSON_UNESCAPED_UNICODE);
+        $Event = Event::all();
+        return response()->json($Event, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -23,12 +23,16 @@ class EsemenyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "tipus" => "required|string|max:120",
-            "tema" => "required|string|max:120",
-            "cel_evfolyam" => "required|string|max:20",
-            "datum" => "required|string|date",
-            "terem" => "required|string|max:255",     
-            "max_letszam" => "required|integer",
+            "type" => "required|string|max:120",
+            "status" => "required|string",
+            "topic" => "required|string|max:120",
+            "target_audience" => "required|string|max:20",
+            "date" => "required|string|date",
+            "location" => "required|string|max:255",     
+            "max_capacity" => "required|integer",
+            "visibility" => "required|string",
+            "created_by" => "required|integer"
+
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -39,7 +43,7 @@ class EsemenyController extends Controller
             "date" => ":attribute csak dátum lehet!",
         ]); 
 
-        Esemeny::create($request->all());
+        Event::create($request->all());
 
         return response()->json([
             "uzenet"=> "Sikeres esemény létrehozás!",
@@ -67,9 +71,9 @@ class EsemenyController extends Controller
      */
     public function destroy(string $id)
     {
-        $esemeny = Esemeny::find($id);
+        $Event = Event::find($id);
 
-        $esemeny->delete();
+        $Event->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",

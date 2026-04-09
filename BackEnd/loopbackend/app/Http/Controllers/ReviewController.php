@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ertekeles;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
-class ErtekelesController extends Controller
+class ReviewController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $ertekeles = Ertekeles::all();
-        return response()->json($ertekeles, 200, options:JSON_UNESCAPED_UNICODE);
+        $Review = Review::all();
+        return response()->json($Review, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -23,11 +23,11 @@ class ErtekelesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "ertekeles_esemeny_id" => "required|exists:esemeny,id",
-            "ertekeles_users_id" => "required|exists:users,id",
-            "ertekeles" => "required|integer|max:10|min:1",
-            "szoveges" => "required|string|max:255",
-            "datum" => "required|date",
+            "reviews_events_id" => "required|exists:events,id",
+            "reviews_users_id" => "required|exists:users,id",
+            "review" => "required|integer|max:10|min:1",
+            "content" => "required|string|max:255",
+            "date" => "required|date",
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -39,7 +39,7 @@ class ErtekelesController extends Controller
             "date" => ":attribute csak dátum lehet!",
         ]); 
 
-        $data = Ertekeles::create($request->all());
+        $data = Review::create($request->all());
 
         return response()->json([
             "uzenet"=> "Sikeres értékelés!",
@@ -60,12 +60,12 @@ class ErtekelesController extends Controller
     public function update(Request $request, string $id)
     {
         $request -> validate([
-            "ertekeles" => "required|integer|max:10|min:1",
+            "Review" => "required|integer|max:10|min:1",
             "szoveges" => "required|string|max:255",
         ]);
 
-        $ertekel = Ertekeles::find($id);
-        $ertekel->ertekeles = $request->ertekeles;
+        $ertekel = Review::find($id);
+        $ertekel->Review = $request->Review;
         $ertekel->szoveges = $request->szoveges;
 
         $ertekel->save();
@@ -80,9 +80,9 @@ class ErtekelesController extends Controller
      */
     public function destroy(string $id)
     {
-        $ertekeles = Ertekeles::find($id);
+        $Review = Review::find($id);
 
-        $ertekeles->delete();
+        $Review->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",

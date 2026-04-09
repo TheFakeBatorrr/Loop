@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\IDO_Esemeny;
 use Illuminate\Http\Request;
 
-class IDO_EsemenyController extends Controller
+use App\Models\Ido_applys;
+
+class Ido_applysController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $ido_es = IDO_Esemeny::all();
-        return response()->json($ido_es, 200, options:JSON_UNESCAPED_UNICODE);
+        $ido_apply = Ido_applys::all();
+        return response()->json($ido_apply, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -23,11 +23,10 @@ class IDO_EsemenyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "ido_esemeny_id" => "required|exists:esemeny:id",
-            "foszervezo" => "required|string|max:255",
-            "foszervezo_id" => "required|exists:diak:id",
-            "bevetel" => "required|string",
-            "kiadas" => "required|string|",     
+            "ido_applys_users_id" => "required|exists:users,id",
+            "motivation" => "required|string|max:255",
+            "experince" => "required|string|max:255",  
+            "accepted" => "required|boolean"
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -36,10 +35,10 @@ class IDO_EsemenyController extends Controller
             "max" => ":attribute :max hoszzú lehet!",
             "min" => ":attribute :min hosszunak kell lennie!",
             "exists" => ":attribute nem létezik!",
-            "date" => ":attribute csak dátum lehet!",
+            "boolean" => ":attribute érvényes értéknek kell lennie!"
         ]); 
 
-        $data = IDO_Esemeny::create($request->all());
+        $data = Ido_applys::create($request->all());
 
         return response()->json([
             "uzenet"=> "Sikeres IDÖ-s esemény létrehozás!",
@@ -67,12 +66,6 @@ class IDO_EsemenyController extends Controller
      */
     public function destroy(string $id)
     {
-        $ido_esemeny = IDO_Esemeny::find($id);
-
-        $ido_esemeny->delete();
-
-        return response()->json([
-            "uzenet" => "Sikeres törlés!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+        //
     }
 }

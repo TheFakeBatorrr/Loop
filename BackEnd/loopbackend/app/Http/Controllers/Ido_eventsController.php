@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Staff;
+use App\Models\Ido_events;
 use Illuminate\Http\Request;
 
-class StaffController extends Controller
+class Ido_eventsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $staff = Staff::all();
-        return response()->json($staff, 200, options:JSON_UNESCAPED_UNICODE);
+        $ido_event = Ido_events::all();
+        return response()->json($ido_event, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -23,9 +23,11 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "staff_users_id" => "required|exists:users,id",
-            "staff_events_id" => "required||exists:evnts,id",
-            //"role" => "required|string|max:255",     
+            "ido_events_id" => "required|exists:events,id",
+            "main_organizer" => "required|string|max:255",
+            "main_organizer_id" => "required|exists:users,id",
+            "revenue" => "required|string",
+            "expanses" => "required|string|",     
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -37,10 +39,10 @@ class StaffController extends Controller
             "date" => ":attribute csak dátum lehet!",
         ]); 
 
-        $data = Staff::create($request->all());
+        $data = Ido_events::create($request->all());
 
         return response()->json([
-            "uzenet"=> "Sikeres Staff jelentkezés!",
+            "uzenet"=> "Sikeres IDÖ-s esemény létrehozás!",
         ],200, options:JSON_UNESCAPED_UNICODE);
     }
 
@@ -65,9 +67,9 @@ class StaffController extends Controller
      */
     public function destroy(string $id)
     {
-        $staff = Staff::find($id);
+        $Ido_events = Ido_events::find($id);
 
-        $staff->delete();
+        $Ido_events->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",

@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Event;
+
 
 class Staff extends Model
 {
@@ -11,12 +13,12 @@ class Staff extends Model
 
     protected $fillable = [
         "staff_users_id",
-        "staff_esemeny_id",
-        "szerep"
+        "staff_events_id",
+        //"role"
     ];
 
-    public function esemeny(){
-        return $this->belongsToMany(Esemeny::class);
+    public function event(){
+        return $this->belongsToMany(Event::class);
     }
 
     public function diak(){

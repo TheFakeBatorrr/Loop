@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('diak', function (Blueprint $table) {
+        Schema::create('ido_applys', function (Blueprint $table) {
             $table->id();
-            $table->string("nev");
-            $table->string("email")->unique();
-            $table->string("username")->unique();
-            $table->string("password");
-            $table->string("osztaly");
-            $table->string("kezdo_evfolyam");
-            $table->boolean("idos");
+            $table->foreignId("ido_applys_users_id")->constrained("users");
+            $table->string("motivation");
+            $table->string("experince");
+            $table->boolean("accepted")->default(0);
             $table->timestamps();
         });
     }
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('diak');
+        Schema::dropIfExists('ido_applys');
     }
 };
