@@ -3,14 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Staff extends Model
 {
     protected $table = "staff";
 
     protected $fillable = [
-        "diak_id",
-        "esemeny_id",
+        "staff_users_id",
+        "staff_esemeny_id",
         "szerep"
     ];
 
@@ -19,6 +20,6 @@ class Staff extends Model
     }
 
     public function diak(){
-        return $this->belongsTo(Diak::class);
+        return $this->belongsTo(User::class);
     }
 }

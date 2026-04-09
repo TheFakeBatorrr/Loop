@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -14,20 +15,20 @@ class AuthController extends Controller
         $request->validate([
             "name" => "required|string",
             "email" => "required|email|string|unique:users",
-            "password"=> "required|string|min:8|confirmed",
+            "password" => "required|string|min:8|confirmed",
             "device_name" => "required|string"
         ]);
 
         $user = User::create([
-            "name"=> $request->name,
-            "email"=> $request->email,
+            "name" => $request->name,
+            "email" => $request->email,
             "password" => $request->password
         ]);
 
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
-            "token"=> $token,
+            "token" => $token,
             "diak" => $user
         ], 201);
     }
@@ -43,16 +44,24 @@ class AuthController extends Controller
 
         $user = User::where("email", $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) 
-        {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(["message" => "Gatya tesó, próbáld máshogy!"], 401);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
-            "token"=> $token,
-            "diak"=> $user
+            "token" => $token,
+            "users" => $user
+        ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            "message" => "Sikeres kijelentkezés!"
         ], 200);
     }
 }

@@ -23,8 +23,8 @@ class ErtekelesController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "esemeny_id" => "required|exists:esemeny:id",
-            "diak_id" => "required|exists:diak:id",
+            "ertekeles_esemeny_id" => "required|exists:esemeny,id",
+            "ertekeles_users_id" => "required|exists:users,id",
             "ertekeles" => "required|integer|max:10|min:1",
             "szoveges" => "required|string|max:255",
             "datum" => "required|date",

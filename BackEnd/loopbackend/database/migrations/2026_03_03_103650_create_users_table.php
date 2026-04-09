@@ -17,10 +17,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string("nev");
-            $table->string("osztaly");
-            $table->string("kezdo_evfolyam");
-            $table->boolean("idos");
+            // $table->string("osztaly");
+            // $table->string("kezdo_evfolyam");
+            // $table->boolean("idos")->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

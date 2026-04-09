@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId("ido_esemeny_id")->constrained("esemeny","id","ido_esemeny_id");
             $table->string("foszervezo");
-            $table->foreignId("foszervezo_id")->constrained("diak","id","foszervezo_id");
+            $table->foreignId("foszervezo_id")->constrained("users","id","foszervezo_id");
             $table->string("bevetel");
-            $table->string("kiadás");
+            $table->string("kiadas");
             $table->timestamps();
         });
     }

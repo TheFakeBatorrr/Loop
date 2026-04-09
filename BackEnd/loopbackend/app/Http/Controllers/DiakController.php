@@ -23,10 +23,6 @@ class DiakController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "nev" => "required|string|max:255",
-            "email" => "required|string|",
-            "username" => "required|string|max:255",
-            "password" => "required|min:8",
             "osztaly" => "required|string|max:5",
             "kezdo_evfolyam" => "required|string|max:15",
             "idos" => "required|boolean|",

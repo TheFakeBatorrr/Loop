@@ -13,7 +13,7 @@ class IDO_Esemeny extends Model
     protected $table = "IDO_esemeny";
 
     protected $fillable = [
-        "esemeny_id",
+        "ido_esemeny_id",
         "foszervezo",
         "foszervezo_id",
         "bevetel",

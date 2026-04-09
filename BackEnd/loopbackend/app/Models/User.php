@@ -9,8 +9,11 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 
+
 class User extends Authenticatable
 {
+    use HasApiTokens; //kell a creatToken()-hez
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -19,14 +22,14 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    protected $table = "users";
     protected $fillable = [
         'name',
         'email',
         'password',
-        "nev",
-        "osztaly",
-        "kezdo_evfolyam",
-        "idos"
+        // "osztaly",
+        // "kezdo_evfolyam",
+        // "idos"
     ];
 
     /**

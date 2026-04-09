@@ -25,8 +25,8 @@ class EsemenyController extends Controller
         $request->validate([
             "tipus" => "required|string|max:120",
             "tema" => "required|string|max:120",
-            "cel_evfolyam" => "required|string|max:10",
-            "datum" => "required|date",
+            "cel_evfolyam" => "required|string|max:20",
+            "datum" => "required|string|date",
             "terem" => "required|string|max:255",     
             "max_letszam" => "required|integer",
         ],
@@ -39,11 +39,11 @@ class EsemenyController extends Controller
             "date" => ":attribute csak dátum lehet!",
         ]); 
 
-        $data = Esemeny::create($request->all());
+        Esemeny::create($request->all());
 
         return response()->json([
             "uzenet"=> "Sikeres esemény létrehozás!",
-        ],200, options:JSON_UNESCAPED_UNICODE);
+        ],201, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**

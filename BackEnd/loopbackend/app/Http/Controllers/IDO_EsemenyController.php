@@ -23,11 +23,11 @@ class IDO_EsemenyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "esemeny_id" => "required|exists:esemeny:id",
+            "ido_esemeny_id" => "required|exists:esemeny:id",
             "foszervezo" => "required|string|max:255",
             "foszervezo_id" => "required|exists:diak:id",
             "bevetel" => "required|string",
-            "kiadás" => "required|string|",     
+            "kiadas" => "required|string|",     
         ],
         [
             "required" => ":attribute megadása kötelező!",

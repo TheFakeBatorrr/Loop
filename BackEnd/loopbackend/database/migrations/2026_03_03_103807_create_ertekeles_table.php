@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ertekeles', function (Blueprint $table) {
             $table->id();
             $table->foreignId("ertekeles_esemeny_id")->constrained("esemeny","id","ertekeles_esemeny_id");
-            $table->foreignId("ertekeles_diak_id")->constrained("diak","id","ertekeles_diak_id");
+            $table->foreignId("ertekeles_users_id")->constrained("users","id","ertekeles_users_id");
             $table->integer("ertekeles");
             $table->string("szoveges");
             $table->date("datum");

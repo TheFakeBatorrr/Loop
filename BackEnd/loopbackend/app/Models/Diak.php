@@ -14,10 +14,6 @@ class Diak extends Model
     protected $table = "diak";
 
     protected $fillable = [
-        "nev",
-        "email",
-        "username",
-        "password",
         "osztaly",
         "kezdo_evfolyam",
         "idos"

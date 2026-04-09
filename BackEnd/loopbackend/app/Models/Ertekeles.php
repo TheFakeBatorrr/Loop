@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Esemeny;
-use App\Models\Diak;
+use App\Models\User;
 
 
 
@@ -13,8 +13,8 @@ class Ertekeles extends Model
     protected $table = "ertekeles";
 
     protected $fillable = [
-        "esemney_id",
-        "diak_id",
+        "ertekeles_esemeny_id",
+        "ertekeles_users_id",
         "ertekeles",
         "szoveges",
         "datum"
@@ -25,6 +25,6 @@ class Ertekeles extends Model
     }
 
     public function diak(){
-        return $this->hasMany(Diak::class);
+        return $this->hasMany(User::class);
     }
 }

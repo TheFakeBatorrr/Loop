@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Ertekeles;
-use App\Models\Diak;
+use App\Models\User;
 
 class Esemeny extends Model
 {
@@ -24,6 +24,6 @@ class Esemeny extends Model
     }
 
     public function diak(){
-        return $this->hasMany(Diak::class);
+        return $this->hasMany(User::class);
     }
 }

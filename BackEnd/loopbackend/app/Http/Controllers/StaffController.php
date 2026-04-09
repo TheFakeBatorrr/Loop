@@ -23,8 +23,8 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "diak_id" => "required|exists:diak:id",
-            "esemeny_id" => "required||exists:esemeny:id",
+            "staff_users_id" => "required|exists:diak:id",
+            "staff_esemeny_id" => "required||exists:esemeny:id",
             "szerep" => "required|string|max:255",     
         ],
         [

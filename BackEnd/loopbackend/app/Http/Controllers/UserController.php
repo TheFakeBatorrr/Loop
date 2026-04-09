@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class DiakController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -23,13 +23,12 @@ class DiakController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "nev" => "required|string|max:255",
             "email" => "required|string|",
-            "username" => "required|string|max:255",
+            "name" => "required|string|max:255",
             "password" => "required|min:8",
             "osztaly" => "required|string|max:5",
             "kezdo_evfolyam" => "required|string|max:15",
-            "idos" => "required|boolean|",
+            
 
         ],
         [
