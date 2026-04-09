@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../components/AuthProvider'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type View = 'compact' | 'reviews' | 'staff'
 
@@ -33,14 +32,11 @@ function Stars({ count }: { count: number }) {
 function CsatlakozasModal({ onClose }: { onClose: () => void }) {
   const [motivacio, setMotivacio] = useState('')
   const [tapasztalat, setTapasztalat] = useState('')
-  const [isMedia, setIsMedia] = useState(false)
-  const [mediaKepesseg, setMediaKepesseg] = useState('')
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
-        <h2 className="text-2xl font-black text-[#6034e3] mb-6">Csatlakozás a DÖK-höz</h2>
-
+        <h2 className="text-2xl font-black text-[#6034e3] mb-6">Csatlakozás az IDÖ-höz</h2>
         <div className="flex flex-col gap-4">
           <div>
             <label className="text-sm font-semibold text-gray-600 mb-1 block">Motiváció</label>
@@ -51,7 +47,6 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#6034e3] transition-all duration-300 resize-none h-28 text-sm"
             />
           </div>
-
           <div>
             <label className="text-sm font-semibold text-gray-600 mb-1 block">Tapasztalat</label>
             <textarea
@@ -61,38 +56,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#6034e3] transition-all duration-300 resize-none h-24 text-sm"
             />
           </div>
-
-          {/* Média switch
-          <div className="flex items-center justify-between bg-[#fafafa] rounded-xl px-4 py-3 border-2 border-gray-100">
-            <span className="font-semibold text-[#171717] text-sm">Médiába szeretnék csatlakozni</span>
-            <button
-              onClick={() => setIsMedia(!isMedia)}
-              className={`w-12 h-6 rounded-full transition-all duration-300 relative ${isMedia ? 'bg-[#6034e3]' : 'bg-gray-300'}`}
-            >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${isMedia ? 'left-7' : 'left-1'}`} />
-            </button>
-          </div>
-
-          { Média extra mezők }
-          {isMedia && (
-            <div className="animate-[fadeInUp_0.3s_ease_forwards]">
-              <label className="text-sm font-semibold text-gray-600 mb-1 block">Média képességek</label>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {['Fotózás', 'Videózás', 'Grafika', 'Social media', 'Szövegírás'].map(k => (
-                  <button
-                    key={k}
-                    onClick={() => setMediaKepesseg(mediaKepesseg === k ? '' : k)}
-                    className={`px-3 py-1 rounded-full border-2 text-sm font-semibold transition-all duration-300
-                      ${mediaKepesseg === k ? 'bg-[#6034e3] border-[#6034e3] text-white' : 'border-[#6034e3] text-[#6034e3]'}`}
-                  >
-                    {k}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}  */}
         </div>
-
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
@@ -100,9 +64,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
           >
             Mégse
           </button>
-          <button
-            className="flex-1 bg-[#6034e3] text-white py-3 rounded-xl font-semibold hover:bg-[#8643eb] transition-all duration-300"
-          >
+          <button className="flex-1 bg-[#6034e3] text-white py-3 rounded-xl font-semibold hover:bg-[#8643eb] transition-all duration-300">
             Küldés
           </button>
         </div>
@@ -114,10 +76,23 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
 export default function DashboardPage() {
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [view, setView] = useState<View>('compact')
   const [csatlakozasModal, setCsatlakozasModal] = useState(false)
+  const [profileData, setProfileData] = useState<{ fullName: string, osztaly: string } | null>(null)
 
   const isIDO = user?.role === 'ido' || user?.role === 'elnok'
+
+  useEffect(() => {
+    const saved = localStorage.getItem('userProfile')
+    if (saved) setProfileData(JSON.parse(saved))
+  }, [])
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab === 'reviews') setView('reviews')
+  }, [searchParams])
 
   // INNEN SZEDJEM MAJD KI A KOMMENTET
   // useEffect(() => {
@@ -136,8 +111,8 @@ export default function DashboardPage() {
         {/* Fejléc */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-black text-[#6034e3]">Dashboard</h1>
-            <p className="text-gray-500 mt-1">Üdv, <span className="font-semibold text-[#171717]">{user?.email ?? 'Vendég'}</span>!</p>
+            <h1 className="text-3xl font-black text-[#6034e3]">Irányítópult</h1>
+            <p className="text-gray-500 mt-1">Üdv, <span className="font-semibold text-[#171717]">{profileData?.fullName ?? 'Vendég'}</span>!</p>
           </div>
           {isIDO && (
             <button
@@ -153,8 +128,6 @@ export default function DashboardPage() {
         {/* COMPACT VIEW */}
         {view === 'compact' && (
           <div className="flex flex-col gap-6">
-
-            {/* Értékelések doboz */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <h2 className="text-lg font-bold text-[#171717] mb-4">Legutóbbi 3 értékelésem</h2>
               <div className="flex flex-col gap-4">
@@ -177,7 +150,6 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            {/* DÖK kompakt doboz */}
             <div className="bg-[#6034e3] rounded-2xl p-6">
               {isIDO ? (
                 <>
@@ -198,7 +170,7 @@ export default function DashboardPage() {
                 </>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-white text-lg font-semibold mb-2">Szeretnél DÖK tag lenni?</p>
+                  <p className="text-white text-lg font-semibold mb-2">Szeretnél IDÖ tag lenni?</p>
                   <p className="text-white/70 mb-4">Csatlakozz a diákönkormányzathoz és légy részese az eseményeknek!</p>
                   <button
                     onClick={() => setCsatlakozasModal(true)}
@@ -209,7 +181,6 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-
           </div>
         )}
 

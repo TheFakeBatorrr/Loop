@@ -18,7 +18,7 @@ export default function Navbar() {
 
   const links = [
   { href: '/main', label: 'Loop' },
-  ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+  ...(user ? [{ href: '/dashboard', label: 'Irányítópult' }] : []),
   { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
 ]
   
@@ -54,7 +54,7 @@ export default function Navbar() {
           (
             <Link
             href="/login"
-            className="border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg
+            className="border-2 border-[#6034e3] my-auto text-[#6034e3] px-4 py-1 rounded-lg
             hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
             >
               Profil
@@ -64,7 +64,7 @@ export default function Navbar() {
           (
             <Link
             href="/login"
-            className="border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg
+            className="border-2 border-[#6034e3] my-auto text-[#6034e3] px-4 py-1 rounded-lg
             hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
             >
             Bejelentkezés
@@ -100,13 +100,26 @@ export default function Navbar() {
           <button className='bg-[#6034e3] rounded-xl  mx-auto w-12 p-2' onClick={toggle}>
             {theme === 'light' ? '🌙' : '☀️'}
           </button>
-          <Link
+          {user ? 
+          (
+            <Link
             href="/login"
-            className="mx-auto border-2 border-[#6034e3] text-[#6034e3] px-4 py-1 rounded-lg w-fit
-              hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
-          >
+            className="border-2 border-[#6034e3] my-auto text-[#6034e3] px-4 py-1 rounded-lg
+            hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
+            >
+              Profil
+            </Link>
+          )
+          :
+          (
+            <Link
+            href="/login"
+            className="border-2 border-[#6034e3] my-auto text-[#6034e3] px-4 py-1 rounded-lg
+            hover:bg-[#6034e3] hover:text-white hover:rounded-[21px] transition-all duration-500"
+            >
             Bejelentkezés
           </Link>
+          )}
         </div>
       )}
     </nav>
