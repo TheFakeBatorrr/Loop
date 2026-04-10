@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('esemeny', function (Blueprint $table) {
+        Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->string("tipus");
-            $table->string("tema");
-            $table->string("cel_evfolyam");
-            $table->date("datum");
-            $table->string("terem");
-            $table->integer("max_letszam");
+            $table->foreignId("reviews_event_id")->constrained("events");
+            $table->foreignId("reviews_user_id")->constrained("users");
+            $table->integer("review");
+            $table->string("content");
+            $table->date("date");
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('esemeny');
+        Schema::dropIfExists('reviews');
     }
 };

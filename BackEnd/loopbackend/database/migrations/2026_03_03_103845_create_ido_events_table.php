@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin', function (Blueprint $table) {
+        Schema::create('ido_events', function (Blueprint $table) {
             $table->id();
-            $table->string("username")->unique();
-            $table->string("password");
+            $table->foreignId("ido_event_id")->constrained("events");  // ← events.id-re mutat
+            $table->foreignId("main_organizer_id")->constrained("users"); // ← users.id-re mutat
+            $table->string("revenue");
+            $table->string("expanses");
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admin');
+        Schema::dropIfExists('ido_events');
     }
 };

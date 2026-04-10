@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('_i_d_o_esemeny', function (Blueprint $table) {
+        Schema::create('ido_applys', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("esemeny_id");
-            $table->string("foszervezo");
-            $table->foreignId("foszervezo_id");
-            $table->string("bevetel");
-            $table->string("kiadás");
+            $table->foreignId("ido_applys_users_id")->constrained("users");
+            $table->string("motivation");
+            $table->string("experince");
+            $table->string("accepted")->default("Pending");
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('_i_d_o_esemeny');
+        Schema::dropIfExists('ido_applys');
     }
 };

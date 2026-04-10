@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Admin;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
-class AdminController extends Controller
+
+class StudentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-       $admin = Admin::all();
-       return response()->json($admin, 200, options:JSON_UNESCAPED_UNICODE);
+        $student = Student::all();
+        return response()->json($student, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -22,23 +22,22 @@ class AdminController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            "username" => "required|string|max:255",
-            "password" => "required|min:8"
+         $request->validate([
+            "users_id" => "required|exists:users,id",
+            "name" => "required|string|max:120",
+            "class_number" => "required|integer|max:5",
+            "class_letter" => "required|string|max:5"
         ],
         [
             "required" => ":attribute megadása kötelező!",
             "string" => ":attribute mező szöveges lehet csak!",
             "max" => ":attribute :max hoszzú lehet!",
-            "min" => ":attribute :min hosszunak kell lennie!",
-            "username" => ":attribute megadása kötelező!",
-            "password" => ":attribute megadása kötelező!"
         ]); 
 
-        $data = Admin::create($request->all());
+        $data = Student::create($request->all());
 
         return response()->json([
-            "uzenet"=> "Sikeres admin csatlakozás!",
+            "uzenet"=> "Sikeres Staff jelentkezés!",
         ],200, options:JSON_UNESCAPED_UNICODE);
     }
 
@@ -63,12 +62,6 @@ class AdminController extends Controller
      */
     public function destroy(string $id)
     {
-        $admin = Admin::find($id);
-
-        $admin->delete();
-
-        return response()->json([
-            "uzenet" => "Sikeres törlés!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+        //
     }
 }

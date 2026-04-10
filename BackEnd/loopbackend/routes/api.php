@@ -3,44 +3,94 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\DiakController;
-use App\Http\Controllers\ErtekelesController;
-use App\Http\Controllers\EsemenyController;
-use App\Http\Controllers\IDO_EsemenyController;
+// use App\Http\Controllers\DiakController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\Ido_eventsController;
+use App\Http\Controllers\Ido_applysController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
 
-Route::get('/api/admin', [AdminController::class, 'index']);
-Route::post('/api/admin', [AdminController::class, 'store']);
-Route::delete('/api/admin/{$id}', [AdminController::class, 'destroy']);
-Route::put('/api/admin/{$id}', [AdminController::class, 'update']);
 
-Route::get('/api/diak', [DiakController::class, 'index']);
-Route::post('/api/diak', [DiakController::class, 'store']);
-Route::delete('/api/diak/{$id}', [DiakController::class, 'destroy']);
-Route::put('/api/diak/{$id}', [DiakController::class, 'update']);
+//LOGIN ÉS REGISTER (AUTH)
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
 
-Route::get('/api/ertekeles', [ErtekelesController::class, 'index']);
-Route::post('/api/ertekeles', [ErtekelesController::class, 'store']);
-Route::delete('/api/ertekeles/{$id}', [ErtekelesController::class, 'destroy']);
-Route::put('/api/ertekeles/{$id}', [ErtekelesController::class, 'update']);
+// ADMIN
+// Route::get('/admin', [AdminController::class, 'index']);
+// Route::post('/admin', [AdminController::class, 'store']);
+// Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
+// Route::put('/admin/{id}', [AdminController::class, 'update']);
 
-Route::get('/api/esemeny', [EsemenyController::class, 'index']);
-Route::post('/api/esemeny', [EsemenyController::class, 'store']);
-Route::delete('/api/esemeny/{$id}', [EsemenyController::class, 'destroy']);
-Route::put('/api/esemeny/{$id}', [EsemenyController::class, 'update']);
 
-Route::get('/api/IDO_esemeny', [IDO_EsemenyController::class, 'index']);
-Route::post('/api/IDO_esemeny', [IDO_EsemenyController::class, 'store']);
-Route::delete('/api/IDO_esemeny/{$id}', [IDO_EsemenyController::class, 'destroy']);
-Route::put('/api/IDO_esemeny/{$id}', [IDO_EsemenyController::class, 'update']);
+//DIÁK
+Route::get('/user', [UserController::class, 'index']);
+Route::post('/user', [UserController::class, 'store']);
+Route::delete('/user/{id}', [UserController::class, 'destroy']);
+Route::put('/user/{id}', [UserController::class, 'update']);
 
-Route::get('/api/staff', [StaffController::class, 'index']);
-Route::post('/api/staff', [StaffController::class, 'store']);
-Route::delete('/api/staff/{$id}', [StaffController::class, 'destroy']);
-Route::put('/api/staff/{$id}', [StaffController::class, 'update']);
+
+
+Route::middleware('auth:sanctum')->group(function() {
+
+    //LOGOUT
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    //ÉRTÉKELÉSEK
+    Route::get('/ertekeles', [ReviewController::class, 'index']);
+    Route::post('/ertekeles', [ReviewController::class, 'store']);
+    Route::delete('/ertekeles/{id}', [ReviewController::class, 'destroy']);
+    Route::put('/ertekeles/{id}', [ReviewController::class, 'update']);
+
+
+    //ESEMÉNYEK
+    Route::get('/esemeny', [EventController::class, 'index']);
+    Route::post('/esemeny', [EventController::class, 'store']);
+    Route::delete('/esemeny/{id}', [EventController::class, 'destroy']);
+    Route::put('/esemeny/{id}', [EventController::class, 'update']);
+
+
+    //IDŐ-s_ESEMÉNYEK
+    Route::get('/IDO_esemeny', [Ido_eventsController::class, 'index']);
+    Route::post('/IDO_esemeny', [Ido_eventsController::class, 'store']);
+    Route::delete('/IDO_esemeny/{id}', [Ido_eventsController::class, 'destroy']);
+    Route::put('/IDO_esemeny/{id}', [Ido_eventsController::class, 'update']);
+
+    //IDŐ-s_JELENTKEZÉS
+    Route::get('/application', [Ido_applysController::class, 'index']);
+    Route::post('/application', [Ido_applysController::class, 'store']);
+    Route::delete('/application/{id}', [Ido_applysController::class, 'destroy']);
+    Route::put('/application/{id}', [Ido_applysController::class, 'update']);
+
+    //diák külön???
+    Route::get('/student', [StudentController::class, 'index']);
+    Route::post('/student', [StudentController::class, 'store']);
+    Route::delete('/student/{id}', [StudentController::class, 'destroy']);
+    Route::put('/student/{id}', [StudentController::class, 'update']);
+        
+    //STAFF
+    Route::get('/staff', [StaffController::class, 'index']);
+    Route::post('/staff', [StaffController::class, 'store']);
+    Route::delete('/staff/{id}', [StaffController::class, 'destroy']);
+    Route::put('/staff/{id}', [StaffController::class, 'update']);
+
+
+});
+
+   
+
+
+
+
+
+
+
+
 
 
