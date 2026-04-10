@@ -14,7 +14,8 @@ class Staff extends Model
     protected $fillable = [
         "staff_users_id",
         "staff_events_id",
-        //"role"
+        "role",
+        "accepted"
     ];
 
     public function event(){

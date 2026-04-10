@@ -10,8 +10,10 @@ class Student extends Model
     protected $table = "students";
 
     protected $fillable = [
+        "users_id",
         "name",
-        "class"
+        "class_number",
+        "class_letter"
     ];
 
     public function diak(){

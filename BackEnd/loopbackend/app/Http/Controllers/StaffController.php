@@ -25,7 +25,9 @@ class StaffController extends Controller
         $request->validate([
             "staff_users_id" => "required|exists:users,id",
             "staff_events_id" => "required||exists:evnts,id",
-            //"role" => "required|string|max:255",     
+            "role" => "required|string|max:255",     
+            "accepted" => "required|boolean"
+
         ],
         [
             "required" => ":attribute megadása kötelező!",

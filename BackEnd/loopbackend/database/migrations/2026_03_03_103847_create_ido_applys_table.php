@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId("ido_applys_users_id")->constrained("users");
             $table->string("motivation");
             $table->string("experince");
-            $table->boolean("accepted")->default(0);
+            $table->string("accepted")->default("Pending");
             $table->timestamps();
         });
     }

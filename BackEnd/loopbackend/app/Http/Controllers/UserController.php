@@ -24,9 +24,10 @@ class UserController extends Controller
     {
         $request->validate([
             "email" => "required|string|",
-            "name" => "required|string|max:255",
-            "password" => "required|min:8"
-        ],
+            "username" => "required|string|max:255",
+            "password" => "required|min:8",
+            "role" =>  "string|max:20"
+        ], 
         [
             "required" => ":attribute megadása kötelező!",
             "string" => ":attribute mező szöveges lehet csak!",

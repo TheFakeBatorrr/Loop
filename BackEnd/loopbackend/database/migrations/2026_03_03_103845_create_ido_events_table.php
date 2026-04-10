@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('ido_events', function (Blueprint $table) {
             $table->id();
             $table->foreignId("ido_event_id")->constrained("events");  // ← events.id-re mutat
-            $table->string("main_organizer");
             $table->foreignId("main_organizer_id")->constrained("users"); // ← users.id-re mutat
             $table->string("revenue");
             $table->string("expanses");

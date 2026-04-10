@@ -23,10 +23,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 // ADMIN
-Route::get('/admin', [AdminController::class, 'index']);
-Route::post('/admin', [AdminController::class, 'store']);
-Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
-Route::put('/admin/{id}', [AdminController::class, 'update']);
+// Route::get('/admin', [AdminController::class, 'index']);
+// Route::post('/admin', [AdminController::class, 'store']);
+// Route::delete('/admin/{id}', [AdminController::class, 'destroy']);
+// Route::put('/admin/{id}', [AdminController::class, 'update']);
 
 
 //DIÁK

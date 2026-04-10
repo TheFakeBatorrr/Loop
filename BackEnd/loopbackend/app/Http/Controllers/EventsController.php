@@ -31,7 +31,7 @@ class EventController extends Controller
             "location" => "required|string|max:255",     
             "max_capacity" => "required|integer",
             "visibility" => "required|string",
-            "created_by" => "required|integer"
+            "created_by" => "required|exists:users,id"
 
         ],
         [
@@ -41,6 +41,7 @@ class EventController extends Controller
             "max" => ":attribute :max hoszzú lehet!",
             "min" => ":attribute :min hosszunak kell lennie!",
             "date" => ":attribute csak dátum lehet!",
+            "exists" => ":attribute nem létezik!",
         ]); 
 
         Event::create($request->all());

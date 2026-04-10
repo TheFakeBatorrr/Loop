@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string("location");
             $table->integer("max_capacity");
             $table->string("visibility");
-            $table->integer("created_by");
+            $table->foreignId("created_by")->constrained("users");
             $table->timestamps();
         });
     }

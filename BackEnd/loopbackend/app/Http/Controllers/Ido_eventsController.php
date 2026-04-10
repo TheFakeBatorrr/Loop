@@ -24,7 +24,6 @@ class Ido_eventsController extends Controller
     {
         $request->validate([
             "ido_events_id" => "required|exists:events,id",
-            "main_organizer" => "required|string|max:255",
             "main_organizer_id" => "required|exists:users,id",
             "revenue" => "required|string",
             "expanses" => "required|string|",     

@@ -26,7 +26,7 @@ class Ido_applysController extends Controller
             "ido_applys_users_id" => "required|exists:users,id",
             "motivation" => "required|string|max:255",
             "experince" => "required|string|max:255",  
-            "accepted" => "required|boolean"
+            "accepted" => "required|string"
         ],
         [
             "required" => ":attribute megadása kötelező!",

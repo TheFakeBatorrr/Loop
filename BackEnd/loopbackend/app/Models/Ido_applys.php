@@ -11,7 +11,7 @@ class Ido_applys extends Model
     protected $table = "ido_applys";
 
     protected $fillable = [
-        "users_id",
+        "ido_applys_users_id",
         "motivation",
         "experince",
         "accepted"

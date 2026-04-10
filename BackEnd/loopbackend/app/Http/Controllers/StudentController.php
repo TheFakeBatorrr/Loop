@@ -23,8 +23,10 @@ class StudentController extends Controller
     public function store(Request $request)
     {
          $request->validate([
+            "users_id" => "required|exists:users,id",
             "name" => "required|string|max:120",
-            "class" => "required|string|max:5",    
+            "class_number" => "required|integer|max:5",
+            "class_letter" => "required|string|max:5"
         ],
         [
             "required" => ":attribute megadása kötelező!",
