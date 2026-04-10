@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -73,7 +73,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
   )
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -108,7 +108,6 @@ export default function DashboardPage() {
 
       <div className="max-w-5xl mx-auto">
 
-        {/* Fejléc */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-black text-[#6034e3]">Irányítópult</h1>
@@ -125,7 +124,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* COMPACT VIEW */}
         {view === 'compact' && (
           <div className="flex flex-col gap-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -184,7 +182,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* REVIEWS VIEW */}
         {view === 'reviews' && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-6">
@@ -211,7 +208,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* STAFF VIEW */}
         {view === 'staff' && isIDO && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-6">
@@ -248,5 +244,13 @@ export default function DashboardPage() {
 
       </div>
     </main>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardContent />
+    </Suspense>
   )
 }
