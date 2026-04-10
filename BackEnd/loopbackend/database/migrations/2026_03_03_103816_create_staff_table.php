@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('staff', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("diak_id");
-            $table->foreignId("esemeny_id");
-            $table->string("szerep");
+            $table->foreignId("staff_user_id")->constrained("users");
+            $table->foreignId("staff_event_id")->constrained("events");
+            $table->string("role");
+            $table->boolean("accepted")->default(0);
             $table->timestamps();
         });
     }

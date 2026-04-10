@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Esemeny;
+use App\Models\Ido_events;
 use Illuminate\Http\Request;
 
-class EsemenyController extends Controller
+class Ido_eventsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $esemeny = Esemeny::all();
-        return response()->json($esemeny, 200, options:JSON_UNESCAPED_UNICODE);
+        $ido_event = Ido_events::all();
+        return response()->json($ido_event, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -23,12 +23,10 @@ class EsemenyController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "tipus" => "required|string|max:120",
-            "tema" => "required|string|max:120",
-            "cel_evfolyam" => "required|string|max:10",
-            "datum" => "required|date",
-            "terem" => "required|string|max:255",     
-            "max_letszam" => "required|integer",
+            "ido_events_id" => "required|exists:events,id",
+            "main_organizer_id" => "required|exists:users,id",
+            "revenue" => "required|string",
+            "expanses" => "required|string|",     
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -36,19 +34,14 @@ class EsemenyController extends Controller
             "integer"=> ":attribute mező szám típusu-nak kell lennie!",
             "max" => ":attribute :max hoszzú lehet!",
             "min" => ":attribute :min hosszunak kell lennie!",
+            "exists" => ":attribute nem létezik!",
             "date" => ":attribute csak dátum lehet!",
-            "tipus" => ":attribute megadása kötelező!",
-            "tema" => ":attribute megadása kötelező!",
-            "cel_evfolyam" => ":attribute megadása kötelező!",
-            "datum" => ":attribute megadása kötelező!",
-            "terem" => ":attribute megadása kötelező!",
-            "max_letszam" => ":attribute megadása kötelező!"
         ]); 
 
-        $data = Esemeny::create($request->all());
+        $data = Ido_events::create($request->all());
 
         return response()->json([
-            "uzenet"=> "Sikeres esemény létrehozás!",
+            "uzenet"=> "Sikeres IDÖ-s esemény létrehozás!",
         ],200, options:JSON_UNESCAPED_UNICODE);
     }
 
@@ -73,9 +66,9 @@ class EsemenyController extends Controller
      */
     public function destroy(string $id)
     {
-        $esemeny = Esemeny::find($id);
+        $Ido_events = Ido_events::find($id);
 
-        $esemeny->delete();
+        $Ido_events->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",
