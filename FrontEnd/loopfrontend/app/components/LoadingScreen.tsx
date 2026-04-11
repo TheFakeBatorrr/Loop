@@ -12,6 +12,7 @@ export default function LoadingScreen() {
         width={100}
         height={100}
         className="animate-[spin_0.6s_linear_2]"
+        priority
       />
     </div>
   )

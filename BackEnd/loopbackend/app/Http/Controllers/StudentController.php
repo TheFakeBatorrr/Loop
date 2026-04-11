@@ -25,7 +25,7 @@ class StudentController extends Controller
          $request->validate([
             "users_id" => "required|exists:users,id",
             "name" => "required|string|max:120",
-            "class_number" => "required|integer|max:5",
+            "class_number" => "required|integer|max:13",
             "class_letter" => "required|string|max:5"
         ],
         [

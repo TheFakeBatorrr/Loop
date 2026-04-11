@@ -2,12 +2,13 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "../components/AuthProvider"
+import { FaEye, FaEyeSlash } from 'react-icons/fa6'
 
 type View = 'choice' | 'register' | 'login' | 'profile'
 
 export default function Login() {
     const router = useRouter()
-    const { user, login: authLogin, logout: authLogout } = useAuth()
+    const { user, login: authLogin, logout: authLogout, token } = useAuth()
 
     const [view, setView] = useState<View>('choice')
     const [showFirstLoginPopup, setShowFirstLoginPopup] = useState(false)
@@ -15,19 +16,15 @@ export default function Login() {
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [passagain, setPassagain] = useState("")
+    const [password_confirmation, setPassword_confirmation] = useState("")
     const [username, setUsername] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
 
     const [fullName, setFullName] = useState("")
     const [osztaly, setOsztaly] = useState("")
 
-    const canLogin = username !== "" && password !== ""
-    const canRegister = email !== "" && password !== "" && username !== "" && passagain !== ""
-    const samePass = password === passagain
-
-    // FAKE credentials
-    const testusername = "asd"
-    const testpassword = "asd"
+    const canLogin = email !== "" && password !== ""
+    const canRegister = email !== "" && password !== "" && username !== "" && password_confirmation !== ""
 
     useEffect(() => {
         if (user) {
@@ -37,20 +34,25 @@ export default function Login() {
         }
     }, [user])
 
-    const generateFakeToken = () => `fake-token-${Math.random().toString(36).substring(2)}`
-
-    const testLogin = () => {
-        if (!canLogin) return alert('Tölts ki minden adatot!')
-        if (username !== testusername || password !== testpassword) {
-            alert('Helytelen felhasználónév vagy jelszó!')
+    const userLogin = async () => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ email, password, device_name: 'web' }),
+        })
+        const data = await response.json()
+        
+        if (!response.ok) {
+            alert('Helytelen email vagy jelszó!')
             setPassword("")
             setUsername("")
             return
         }
 
-        const fakeToken = generateFakeToken()
-        const fakeUser = { id: 1, email: 'test@loop.hu', role: 'diak' }
-        authLogin(fakeToken, fakeUser)
+        authLogin(data.token, data.users)
 
         const isFirstLogin = !localStorage.getItem('hasLoggedInBefore')
         if (isFirstLogin) {
@@ -61,23 +63,56 @@ export default function Login() {
         }
     }
 
-    const testRegister = () => {
-        if (!samePass) return alert("A jelszavak nem egyeznek!")
+    const userRegister = async () => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ username, email, password, password_confirmation, device_name: 'web' }),
+        })
+        const data = await response.json()
 
-        const fakeToken = generateFakeToken()
-        const fakeUser = { id: 1, email, role: 'diak' }
-        authLogin(fakeToken, fakeUser)
+        if (!response.ok) {
+            alert(data.message ?? 'Hiba történt a regisztráció során!')
+            return
+        }
 
+        authLogin(data.token, data.diak)
         localStorage.setItem('hasLoggedInBefore', 'true')
         setShowFirstLoginPopup(true)
     }
 
-    const handlePopupSubmit = () => {
-        localStorage.setItem('userProfile', JSON.stringify({ fullName, osztaly }))
-        setProfileData({ fullName, osztaly })
-        setShowFirstLoginPopup(false)
-        router.push('/main')
+
+    const handlePopupSubmit = async () => {
+    const [class_year, class_letter] = osztaly.split('.')
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+            users_id: user?.id,
+            name: fullName, 
+            class_number: parseInt(class_year), 
+            class_letter: class_letter 
+        })
+    })
+
+    if (!response.ok) {
+        alert('Hiba történt!')
+        return
     }
+
+    localStorage.setItem('userProfile', JSON.stringify({ fullName, osztaly }))
+    setProfileData({ fullName, osztaly })
+    setShowFirstLoginPopup(false)
+    router.push('/main')
+    }   
 
     const handleLogout = () => {
         authLogout()
@@ -141,27 +176,36 @@ export default function Login() {
                     <h1 className="text-white text-2xl font-bold text-center">Bejelentkezés</h1>
                     <input
                         type="text"
-                        placeholder="Felhasználónév"
-                        value={username}
-                        onChange={e => setUsername(e.target.value)}
+                        placeholder="Email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                         className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
                     />
-                    <input
-                        type="password"
-                        placeholder="Jelszó"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Jelszó"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300 w-full"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-all"
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                    </div>
                     <button
                         className={`bg-white text-[#6034e3] font-bold py-3 rounded-xl transition-all duration-500
                         ${canLogin ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-                        onClick={testLogin}
+                        onClick={userLogin}
                     >
                         Bejelentkezés
                     </button>
                     <button
-                        onClick={() => { setView('register'); setEmail(''); setPassword(''); setUsername('') }}
+                        onClick={() => { setView('register'); setEmail(''); setPassword(''); setUsername('');setPassword_confirmation('') }}
                         style={{ color: "white" }}
                         className="py-2 rounded-xl border-white border w-fit mx-auto px-3"
                     >
@@ -187,24 +231,33 @@ export default function Login() {
                         onChange={e => setUsername(e.target.value)}
                         className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
                     />
-                    <input
-                        type="password"
-                        placeholder="Jelszó"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
-                    />
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Jelszó"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300 w-full"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-all"
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                    </div>
                     <input
                         type="password"
                         placeholder="Jelszó megerősítése"
-                        value={passagain}
-                        onChange={e => setPassagain(e.target.value)}
+                        value={password_confirmation}
+                        onChange={e => setPassword_confirmation(e.target.value)}
                         className="bg-white/10 text-white placeholder-white/60 border border-white/30 rounded-xl px-4 py-3 outline-none focus:border-white transition-all duration-300"
                     />
                     <button
                         className={`bg-white text-[#6034e3] font-bold py-3 rounded-xl transition-all duration-500
                         ${canRegister ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-                        onClick={testRegister}
+                        onClick={userRegister}
                     >
                         Regisztráció
                     </button>

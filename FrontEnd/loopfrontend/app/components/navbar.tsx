@@ -28,7 +28,7 @@ export default function Navbar() {
 
         {/* Logo balra */}
         <Link href="/">
-          <Image src={Logo} alt="Loop logo" height={55} width={55} />
+          <Image src={Logo} priority alt="Loop logo" height={55} width={55} />
         </Link>
 
         {/* Linkek középen */}

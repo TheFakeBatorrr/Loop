@@ -25,26 +25,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedToken = localStorage.getItem('token')
     if (!savedToken) return
-
-    fetch('http://127.0.0.1:8000/api/me', {
-      headers: { Authorization: `Bearer ${savedToken}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        setUser(data)
-        setToken(savedToken)
-      })
-      .catch(() => localStorage.removeItem('token'))
+    setToken(savedToken)
+    const savedUser = localStorage.getItem('user')
+    if (savedUser) setUser(JSON.parse(savedUser))
   }, [])
 
   const login = (token: string, user: User) => {
     localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
     setToken(token)
     setUser(user)
   }
 
   const logout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     setToken(null)
     setUser(null)
   }
