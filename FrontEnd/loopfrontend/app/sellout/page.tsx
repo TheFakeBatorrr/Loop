@@ -90,7 +90,7 @@ export default function SelloutPage() {
 
       {/* SZÁMOK */}
       <section className="bg-[#6034e3] pb-16 px-6">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 gap-8 text-center text-white">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
           {[
             { target: 24, suffix: '/7', label: 'Elérhető' },
             { target: 3, suffix: ' perc', label: 'Villámgyors telepítés' },
