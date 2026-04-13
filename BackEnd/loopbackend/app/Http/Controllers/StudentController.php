@@ -46,7 +46,13 @@ class StudentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $student = Student::where('users_id', $id)->first();
+        
+        if (!$student) {
+            return response()->json(["uzenet" => "Nem található"], 404);
+        }
+        
+        return response()->json($student, 200);
     }
 
     /**

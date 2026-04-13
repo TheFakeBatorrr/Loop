@@ -54,11 +54,24 @@ export default function Login() {
 
         authLogin(data.token, data.users)
 
-        const isFirstLogin = !localStorage.getItem('hasLoggedInBefore')
-        if (isFirstLogin) {
-            localStorage.setItem('hasLoggedInBefore', 'true')
+        await checkFirstLogin(data.users.id, data.token)
+    }
+
+    const checkFirstLogin = async (userId: number, token: string) => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student/${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            },
+        })
+
+        if (response.status === 404) {
             setShowFirstLoginPopup(true)
         } else {
+            const data = await response.json()
+            const osztaly = `${data.class_number}.${data.class_letter}`
+            localStorage.setItem('userProfile', JSON.stringify({ fullName: data.name, osztaly }))
+            setProfileData({ fullName: data.name, osztaly })
             router.push('/main')
         }
     }
@@ -80,38 +93,37 @@ export default function Login() {
         }
 
         authLogin(data.token, data.diak)
-        localStorage.setItem('hasLoggedInBefore', 'true')
         setShowFirstLoginPopup(true)
     }
 
 
     const handlePopupSubmit = async () => {
-    const [class_year, class_letter] = osztaly.split('.')
+        const [class_year, class_letter] = osztaly.split('.')
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-            users_id: user?.id,
-            name: fullName, 
-            class_number: parseInt(class_year), 
-            class_letter: class_letter 
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ 
+                users_id: user?.id,
+                name: fullName, 
+                class_number: parseInt(class_year), 
+                class_letter: class_letter 
+            })
         })
-    })
 
-    if (!response.ok) {
-        alert('Hiba történt!')
-        return
-    }
+        if (!response.ok) {
+            alert('Hiba történt!')
+            return
+        }
 
-    localStorage.setItem('userProfile', JSON.stringify({ fullName, osztaly }))
-    setProfileData({ fullName, osztaly })
-    setShowFirstLoginPopup(false)
-    router.push('/main')
+        localStorage.setItem('userProfile', JSON.stringify({ fullName, osztaly }))
+        setProfileData({ fullName, osztaly })
+        setShowFirstLoginPopup(false)
+        router.push('/main')
     }   
 
     const handleLogout = () => {

@@ -68,8 +68,9 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::delete('/application/{id}', [Ido_applysController::class, 'destroy']);
     Route::put('/application/{id}', [Ido_applysController::class, 'update']);
 
-    //diák külön???
+    //DIÁK KITERJESZTETT
     Route::get('/student', [StudentController::class, 'index']);
+    Route::get('student/{id}', [StudentController::class , 'show']);
     Route::post('/student', [StudentController::class, 'store']);
     Route::delete('/student/{id}', [StudentController::class, 'destroy']);
     Route::put('/student/{id}', [StudentController::class, 'update']);
