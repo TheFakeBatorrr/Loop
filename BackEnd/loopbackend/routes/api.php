@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
     //IDŐ-s_JELENTKEZÉS
     Route::get('/application', [Ido_applysController::class, 'index']);
+    Route::get('/application/{id}', [Ido_applysController::class, 'show']);
     Route::post('/application', [Ido_applysController::class, 'store']);
     Route::delete('/application/{id}', [Ido_applysController::class, 'destroy']);
     Route::put('/application/{id}', [Ido_applysController::class, 'update']);

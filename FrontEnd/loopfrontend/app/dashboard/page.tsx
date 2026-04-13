@@ -6,18 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 type View = 'compact' | 'reviews' | 'staff'
 
-const fakeReviews = [
-  { id: 1, event: 'Gólyabál 2025', rating: 5, comment: 'Fantasztikus este volt!', date: '2025.03.15' },
-  { id: 2, event: 'Sportsnap', rating: 4, comment: 'Jól szervezett, de lehetett volna több program.', date: '2025.02.20' },
-  { id: 3, event: 'Karácsonyi műsor', rating: 5, comment: 'Hangulatos és szép volt.', date: '2024.12.18' },
-]
-
-const fakePrograms = [
-  { id: 1, name: 'Gólyabál 2025', date: '2025.03.15', role: 'Szervező', extraInfo: 'Placeholder: részvételi adatok' },
-  { id: 2, name: 'Sportsnap', date: '2025.02.20', role: 'Segítő', extraInfo: 'Placeholder: feladatok listája' },
-  { id: 3, name: 'Karácsonyi műsor', date: '2024.12.18', role: 'Főszervező', extraInfo: 'Placeholder: költségvetés' },
-  { id: 4, name: 'Nyílt nap', date: '2024.11.05', role: null, extraInfo: null },
-]
+type Application = {
+  id: number
+  ido_applys_users_id: number
+  motivation: string
+  experince: string
+  accepted: string
+}
 
 function Stars({ count }: { count: number }) {
   return (
@@ -29,7 +24,7 @@ function Stars({ count }: { count: number }) {
   )
 }
 
-function CsatlakozasModal({ onClose }: { onClose: () => void }) {
+function CsatlakozasModal({ onClose, onSubmit }: { onClose: () => void, onSubmit: (motivacio: string, tapasztalat: string) => void }) {
   const [motivacio, setMotivacio] = useState('')
   const [tapasztalat, setTapasztalat] = useState('')
 
@@ -43,7 +38,7 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
             <textarea
               value={motivacio}
               onChange={e => setMotivacio(e.target.value)}
-              placeholder="Miért szeretnél csatlakozni a DÖK-höz?"
+              placeholder="Miért szeretnél csatlakozni az IDÖ-höz?"
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#6034e3] transition-all duration-300 resize-none h-28 text-sm"
             />
           </div>
@@ -64,7 +59,10 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
           >
             Mégse
           </button>
-          <button className="flex-1 bg-[#6034e3] text-white py-3 rounded-xl font-semibold hover:bg-[#8643eb] transition-all duration-300">
+          <button
+            onClick={() => onSubmit(motivacio, tapasztalat)}
+            className="flex-1 bg-[#6034e3] text-white py-3 rounded-xl font-semibold hover:bg-[#8643eb] transition-all duration-300"
+          >
             Küldés
           </button>
         </div>
@@ -74,15 +72,17 @@ function CsatlakozasModal({ onClose }: { onClose: () => void }) {
 }
 
 function DashboardContent() {
-  const { user } = useAuth()
+  const { user, token } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const [view, setView] = useState<View>('compact')
   const [csatlakozasModal, setCsatlakozasModal] = useState(false)
   const [profileData, setProfileData] = useState<{ fullName: string, osztaly: string } | null>(null)
+  const [application, setApplication] = useState<Application | null>(null)
+  const [applicationLoading, setApplicationLoading] = useState(true)
 
-  const isIDO = user?.role === 'ido' || user?.role === 'elnok'
+  const isIDO = user?.role === 'idos' || user?.role === 'elnok'
 
   useEffect(() => {
     const saved = localStorage.getItem('userProfile')
@@ -94,17 +94,118 @@ function DashboardContent() {
     if (tab === 'reviews') setView('reviews')
   }, [searchParams])
 
-  // INNEN SZEDJEM MAJD KI A KOMMENTET
-  // useEffect(() => {
-  //   if (!user) router.push('/login')
-  // }, [user])
+  useEffect(() => {
+    if (!user || isIDO) return
+    fetchApplication()
+  }, [user])
 
-  // INNEN SZEDJEM MAJD KI A KOMMENTET
-  // if (!user) return null
+  const fetchApplication = async () => {
+    setApplicationLoading(true)
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/application/${user?.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    })
+    if (response.status === 404) {
+      setApplication(null)
+    } else {
+      const data = await response.json()
+      setApplication(data)
+    }
+    setApplicationLoading(false)
+  }
+
+  const handleApply = async (motivacio: string, tapasztalat: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/application`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        ido_applys_users_id: user?.id,
+        motivation: motivacio,
+        experince: tapasztalat,
+      })
+    })
+
+    if (!response.ok) {
+      alert('Hiba történt a jelentkezés során!')
+      return
+    }
+
+    setCsatlakozasModal(false)
+    await fetchApplication()
+  }
+
+  useEffect(() => {
+   if (!user) router.push('/login')
+    }, [user])
+
+  if (!user) return null
+
+  const renderIDOPanel = () => {
+    if (isIDO) {
+      return (
+        <div className="bg-[#6034e3] rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-white mb-4">Legutóbbi 3 programom</h2>
+          <p className="text-white/60 text-sm">Még nincs program adat.</p>
+        </div>
+      )
+    }
+
+    if (applicationLoading) {
+      return (
+        <div className="bg-[#6034e3] rounded-2xl p-6 flex items-center justify-center py-10">
+          <p className="text-white/60 text-sm">Betöltés...</p>
+        </div>
+      )
+    }
+
+    if (application?.accepted === 'Pending') {
+      return (
+        <div className="bg-[#6034e3] rounded-2xl p-6">
+          <div className="text-center py-4">
+            <div className="text-4xl mb-3">⏳</div>
+            <p className="text-white text-lg font-bold mb-2">Jelentkezés elbírálás alatt</p>
+            <p className="text-white/70 text-sm">A jelentkezésedet megkaptuk, hamarosan visszajelzünk!</p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="bg-[#6034e3] rounded-2xl p-6">
+        {application?.accepted === 'Declined' && (
+          <div className="bg-white/10 rounded-xl p-3 mb-4">
+            <p className="text-white text-sm font-semibold">❌ Korábbi jelentkezésedet elutasították.</p>
+            <p className="text-white/60 text-sm mt-1">Újra jelentkezhetsz!</p>
+          </div>
+        )}
+        <div className="text-center py-4">
+          <p className="text-white text-lg font-semibold mb-2">Szeretnél IDÖ tag lenni?</p>
+          <p className="text-white/70 mb-4">Csatlakozz a diákönkormányzathoz és légy részese az eseményeknek!</p>
+          <button
+            onClick={() => setCsatlakozasModal(true)}
+            className="border-2 border-white text-white px-6 py-2 rounded-xl font-semibold hover:bg-white hover:text-[#6034e3] transition-all duration-300"
+          >
+            Csatlakozás
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-[#fafafa] py-10 px-6">
-      {csatlakozasModal && <CsatlakozasModal onClose={() => setCsatlakozasModal(false)} />}
+      {csatlakozasModal && (
+        <CsatlakozasModal
+          onClose={() => setCsatlakozasModal(false)}
+          onSubmit={handleApply}
+        />
+      )}
 
       <div className="max-w-5xl mx-auto">
 
@@ -128,18 +229,7 @@ function DashboardContent() {
           <div className="flex flex-col gap-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <h2 className="text-lg font-bold text-[#171717] mb-4">Legutóbbi 3 értékelésem</h2>
-              <div className="flex flex-col gap-4">
-                {fakeReviews.map(r => (
-                  <div key={r.id} className="flex items-center justify-between border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                    <div>
-                      <p className="font-semibold text-[#171717]">{r.event}</p>
-                      <p className="text-gray-400 text-sm">{r.date}</p>
-                      <p className="text-gray-500 text-sm mt-1">{r.comment}</p>
-                    </div>
-                    <Stars count={r.rating} />
-                  </div>
-                ))}
-              </div>
+              <p className="text-gray-400 text-sm">Még nincs értékelés.</p>
               <button
                 onClick={() => setView('reviews')}
                 className="mt-4 border-2 border-[#6034e3] text-[#6034e3] px-4 py-2 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all duration-300 w-full"
@@ -148,37 +238,7 @@ function DashboardContent() {
               </button>
             </div>
 
-            <div className="bg-[#6034e3] rounded-2xl p-6">
-              {isIDO ? (
-                <>
-                  <h2 className="text-lg font-bold text-white mb-4">Legutóbbi 3 programom</h2>
-                  <div className="flex flex-col gap-3">
-                    {fakePrograms.slice(0, 3).map(p => (
-                      <div key={p.id} className="bg-white/10 rounded-xl px-4 py-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-white font-semibold">{p.name}</p>
-                          <p className="text-white/60 text-sm">{p.date}</p>
-                        </div>
-                        {p.role && (
-                          <span className="bg-white/20 text-white text-sm px-3 py-1 rounded-full">{p.role}</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-white text-lg font-semibold mb-2">Szeretnél IDÖ tag lenni?</p>
-                  <p className="text-white/70 mb-4">Csatlakozz a diákönkormányzathoz és légy részese az eseményeknek!</p>
-                  <button
-                    onClick={() => setCsatlakozasModal(true)}
-                    className="border-2 border-white text-white px-6 py-2 rounded-xl font-semibold hover:bg-white hover:text-[#6034e3] transition-all duration-300"
-                  >
-                    Csatlakozás
-                  </button>
-                </div>
-              )}
-            </div>
+            {renderIDOPanel()}
           </div>
         )}
 
@@ -193,18 +253,7 @@ function DashboardContent() {
                 ← Vissza
               </button>
             </div>
-            <div className="flex flex-col gap-4">
-              {fakeReviews.map(r => (
-                <div key={r.id} className="bg-[#fafafa] rounded-xl p-4 border border-gray-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-bold text-[#171717]">{r.event}</p>
-                    <Stars count={r.rating} />
-                  </div>
-                  <p className="text-gray-500 text-sm">{r.comment}</p>
-                  <p className="text-gray-400 text-xs mt-2">{r.date}</p>
-                </div>
-              ))}
-            </div>
+            <p className="text-gray-400 text-sm">Még nincs értékelés.</p>
           </div>
         )}
 
@@ -219,26 +268,7 @@ function DashboardContent() {
                 ← Vissza
               </button>
             </div>
-            <div className="flex flex-col gap-4">
-              {fakePrograms.map(p => (
-                <div key={p.id} className={`rounded-xl p-4 border ${p.role ? 'border-[#6034e3]/30 bg-[#6034e3]/5' : 'border-gray-100 bg-[#fafafa]'}`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-bold text-[#171717]">{p.name}</p>
-                    {p.role ? (
-                      <span className="bg-[#6034e3] text-white text-sm px-3 py-1 rounded-full">{p.role}</span>
-                    ) : (
-                      <span className="bg-gray-200 text-gray-500 text-sm px-3 py-1 rounded-full">Nem voltam staff</span>
-                    )}
-                  </div>
-                  <p className="text-gray-400 text-sm mb-2">{p.date}</p>
-                  {p.extraInfo && (
-                    <div className="bg-white rounded-lg p-3 border border-[#6034e3]/20">
-                      <p className="text-gray-500 text-sm">{p.extraInfo}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <p className="text-gray-400 text-sm">Még nincs program adat.</p>
           </div>
         )}
 

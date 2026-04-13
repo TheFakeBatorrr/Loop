@@ -26,7 +26,6 @@ class Ido_applysController extends Controller
             "ido_applys_users_id" => "required|exists:users,id",
             "motivation" => "required|string|max:255",
             "experince" => "required|string|max:255",  
-            "accepted" => "required|string"
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -38,7 +37,11 @@ class Ido_applysController extends Controller
             "boolean" => ":attribute érvényes értéknek kell lennie!"
         ]); 
 
-        $data = Ido_applys::create($request->all());
+        $data = Ido_applys::create([
+            'ido_applys_users_id' => $request->ido_applys_users_id,
+            'motivation' => $request->motivation,
+            'experince' => $request->experince,
+        ]);
 
         return response()->json([
             "uzenet"=> "Sikeres IDÖ-s esemény létrehozás!",
@@ -50,7 +53,13 @@ class Ido_applysController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $application = Ido_applys::where('ido_applys_users_id', $id)->first();
+    
+        if (!$application) {
+            return response()->json(null, 404);
+        }
+        
+        return response()->json($application, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
