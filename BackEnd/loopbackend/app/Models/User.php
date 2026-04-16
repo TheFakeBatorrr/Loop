@@ -65,4 +65,13 @@ class User extends Authenticatable
         return $this->belongsTo(Staff::class);
     }
 
+    public function apply(){
+        return $this->hasMany(Ido_applys::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class, 'users_id', 'id');
+    }
+
 }

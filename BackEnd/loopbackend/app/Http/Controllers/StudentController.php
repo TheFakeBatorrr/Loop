@@ -60,7 +60,32 @@ class StudentController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            "class_number" => "required|integer|max:13",
+            "class_letter" => "required|string|max:5"
+        ],
+        [
+            "required" => ":attribute megadása kötelező!",
+            "max" => ":attribute maximum :max lehet!",
+            "string" => ":attribute mező szöveges lehet csak!",
+            "INTEGER" => ":attribute mező szám lehet csak!"
+        ]);
+
+        $diak = Student::find($id);
+
+        if (!$diak) {
+            return response()->json([
+                "uzenet" => "A felhasználó nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $diak-> class_number = $request-> class_number;
+        $diak-> class_letter = $request-> class_letter;
+        $diak->save();
+
+        return response()->json([
+            "uzenet" => "Diák osztálya megváltoztatva!"
+        ], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

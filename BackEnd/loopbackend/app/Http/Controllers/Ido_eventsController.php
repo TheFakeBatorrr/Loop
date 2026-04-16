@@ -58,7 +58,30 @@ class Ido_eventsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            "revenue" => "required|string",
+            "expanses" => "required|string",     
+        ],
+        [
+            "required" => ":attribute megadása kötelező!",
+            "string"   => ":attribute mező szöveges lehet csak!",
+        ]);
+
+        $ido_events = Ido_events::find($id);
+
+        if (!$ido_events) {
+            return response()->json([
+                "uzenet" => "Az IDÖ esemény nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $ido_events->revenue = $request->revenue;
+        $ido_events->expanses = $request->expanses;
+        $ido_events->save();
+
+        return response()->json([
+            "uzenet" => "Be/Ki-adások megváltoztatva!"
+        ], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

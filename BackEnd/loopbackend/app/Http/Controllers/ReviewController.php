@@ -59,18 +59,31 @@ class ReviewController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request -> validate([
-            "Review" => "required|integer|max:10|min:1",
-            "szoveges" => "required|string|max:255",
+        $request->validate([
+            "review" => "required|integer|max:10|min:1",
+            "content" => "required|string|max:255",
+        ],
+        [
+            "required" => ":attribute megadása kötelező!",
+            "integer" => ":attribute mező szám típusú kell legyen!",
+            "max" => ":attribute maximum :max lehet!",
+            "min" => ":attribute minimum :min kell legyen!",
+            "string" => ":attribute mező szöveges lehet csak!",
         ]);
 
         $ertekel = Review::find($id);
-        $ertekel->Review = $request->Review;
-        $ertekel->szoveges = $request->szoveges;
 
+        if (!$ertekel) {
+            return response()->json([
+                "uzenet" => "Az értékelés nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $ertekel->review = $request->review;
+        $ertekel->content = $request->content;
         $ertekel->save();
 
-        return response() -> json([
+        return response()->json([
             "uzenet" => "Értékelés megváltoztatva!"
         ], 200, options: JSON_UNESCAPED_UNICODE);
     }

@@ -59,7 +59,31 @@ class StaffController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            "accepted" => "required|string|boolean",
+            "role" => "required|string|max:20",
+        ],
+        [
+            "required" => ":attribute megadása kötelező!",
+            "string"   => ":attribute mező szöveges lehet csak!",
+            "boolean" => ":attribute mező nem valós érték!"
+        ]);
+
+        $staff = Staff::find($id);
+
+        if (!$staff) {
+            return response()->json([
+                "uzenet" => "A jelentkezés nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $staff->accepted = $request->accepted;
+        $staff->role = $request->role;
+        $staff->save();
+
+        return response()->json([
+            "uzenet" => "Jelentkezés/szerepkör megváltoztatva!"
+        ], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

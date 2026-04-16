@@ -179,7 +179,7 @@ export default function AdminDashboard() {
 
     // INNEN SZEDJEM MAJD KI A KOMMENTET
     // useEffect(() => {
-    //   if (user?.role !== 'admin') router.push('/main')
+    //   if (user?.role !== 'Admin') router.push('/main')
     // }, [user])
 
     const pendingEvents = events.filter(e => e.status === 'pending_review')
@@ -270,6 +270,28 @@ export default function AdminDashboard() {
                         ))}
                     </div>
                 </SectionBox>
+
+                {/*Elnöki pozíció felület*/}
+                <SectionBox
+                    title="Elnök"
+                    subtitle="Elnöki pozíció átadáasa"
+                >
+                    <div className="flex flex-col gap-4">
+                        <div className="bg-white rounded-xl p-4">
+                            <p className="text-sm font-semibold">Jelenlegi elnök:</p>
+                            <p className="text-yellow-600 text-sm mt-1">!!ELNÖK NEVE!!</p>
+                        </div>
+                        <div className="flex gap-3 flex-wrap">
+                            <select name="" id="">
+                                <option value=""></option>
+                            </select>
+                            <button className="flex-1 min-w-[200px] border-2 border-[#6034e3] text-[#6034e3] py-3 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all">
+                                Pozíció átadása
+                            </button>
+                        </div>
+                    </div>
+                </SectionBox>
+
 
                 {/* Év végi műveletek */}
                 <SectionBox

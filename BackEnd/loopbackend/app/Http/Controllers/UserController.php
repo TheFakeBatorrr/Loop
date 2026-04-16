@@ -17,13 +17,18 @@ class UserController extends Controller
         return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
+    public function staff()
+    {
+        
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $request->validate([
-            "email" => "required|string|",
+            "email" => "required|string|email",
             "username" => "required|string|max:255",
             "password" => "required|min:8",
             "role" =>  "string|max:20"
@@ -57,7 +62,7 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
     }
 
     /**
@@ -67,10 +72,16 @@ class UserController extends Controller
     {
         $diak = User::find($id);
 
+        if (!$diak) {
+            return response()->json([
+                "uzenet" => "A felhasználó nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
         $diak->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+        ], 200, options: JSON_UNESCAPED_UNICODE); 
     }
 }

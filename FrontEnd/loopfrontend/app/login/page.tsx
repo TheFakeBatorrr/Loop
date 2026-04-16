@@ -54,7 +54,10 @@ export default function Login() {
 
         authLogin(data.token, data.users)
 
-        await checkFirstLogin(data.users.id, data.token)
+        if(user?.role != "Admin")
+        {
+            await checkFirstLogin(data.users.id, data.token)
+        }
     }
 
     const checkFirstLogin = async (userId: number, token: string) => {
