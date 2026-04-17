@@ -14,12 +14,26 @@ class UserController extends Controller
     public function index()
     {
         $diak = User::all();
-        return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);
+        return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);   
     }
 
-    public function staff()
+    public function getStaff()
     {
-        
+        $staff = User::query()
+        ->join('students' , 'users.id' , '=' , 'students.users_id' )
+        ->where('role','Idos')
+        ->select(
+            'users.id',
+            'users.email',
+            'users.role',
+            'students.name',
+            'students.class_number',
+            'students.class_letter',
+        )
+        ->get();
+
+        return response()->json($staff, 200, options:JSON_UNESCAPED_UNICODE);
+
     }
 
     /**

@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store');
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
+        Route::get('/getstaff','getStaff');
+
     });
 
     // ÉRTÉKELÉSEK
