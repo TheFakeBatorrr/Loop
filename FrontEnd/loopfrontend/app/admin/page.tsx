@@ -352,7 +352,7 @@ export default function AdminDashboard() {
 
                 {/* Jóváhagyásra váró események */}
                 <SectionBox
-                    title="Jóváhagyásra váró események"
+                    title="Jóváhagyásra váró események ✅"
                     subtitle={`${pendingEvents.length} esemény vár jóváhagyásra`}
                 >
                     {eventsLoading ? (
@@ -390,7 +390,7 @@ export default function AdminDashboard() {
 
                 {/* Aktív események */}
                 <SectionBox
-                    title="Aktív események"
+                    title="Aktív események ⏱️"
                     subtitle="Minden folyamatban lévő esemény és azok státusza"
                 >
                     {eventsLoading ? (
@@ -417,7 +417,7 @@ export default function AdminDashboard() {
 
                 {/* Elnök pozíció átadás */}
                 <SectionBox
-                    title="Elnöki pozíció"
+                    title="Elnöki pozíció 👑"
                     subtitle="Elnöki szerepkör átadása IDÖ tagnak"
                 >
                     <div className="flex flex-col gap-4">
@@ -463,7 +463,7 @@ export default function AdminDashboard() {
 
                 {/* Év végi műveletek */}
                 <SectionBox
-                    title="Év végi műveletek"
+                    title="Év végi műveletek ⌛"
                     subtitle="Évfolyam bump és végzős diákok törlése — csak tanév végén futtasd!"
                 >
                     <div className="flex flex-col gap-4">
@@ -474,13 +474,13 @@ export default function AdminDashboard() {
                         <div className="flex gap-3 flex-wrap">
                             <button
                                 // TODO: bekötni — év végi bump endpoint kész után
-                                className="flex-1 min-w-[200px] border-2 border-[#6034e3] text-[#6034e3] py-3 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all"
+                                className="flex-1 min-w-50 border-2 border-[#6034e3] text-[#6034e3] py-3 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all"
                             >
                                 Évfolyam bump (+1 év minden diáknak)
                             </button>
                             <button
                                 // TODO: bekötni — végzős törlés endpoint kész után
-                                className="flex-1 min-w-[200px] border-2 border-red-400 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-400 hover:text-white transition-all"
+                                className="flex-1 min-w-50 border-2 border-red-400 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-400 hover:text-white transition-all"
                             >
                                 Végzősök törlése (12-13. évfolyam)
                             </button>
@@ -490,7 +490,7 @@ export default function AdminDashboard() {
 
                 {/* Lezárt események */}
                 <SectionBox
-                    title="Lezárt események"
+                    title="Lezárt események 🛑"
                     subtitle="Már véget ért események archívuma"
                 >
                     {eventsLoading ? (
