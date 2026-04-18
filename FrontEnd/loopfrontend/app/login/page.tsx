@@ -28,6 +28,10 @@ export default function Login() {
 
     useEffect(() => {
         if (user) {
+            if (user.role === 'Admin') {
+                router.push('/admin')
+                return
+            }
             setView('profile')
             const saved = localStorage.getItem('userProfile')
             if (saved) setProfileData(JSON.parse(saved))
@@ -54,10 +58,13 @@ export default function Login() {
 
         authLogin(data.token, data.users)
 
-        if(user?.role != "Admin")
+        if(data.users.role === 'Admin')
         {
-            await checkFirstLogin(data.users.id, data.token)
+            router.push('/admin')
+            return
         }
+
+        await checkFirstLogin(data.users.id , data.token)
     }
 
     const checkFirstLogin = async (userId: number, token: string) => {

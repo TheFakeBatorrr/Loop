@@ -35,6 +35,14 @@ type Event = {
   visibility: 'public' | 'ido_only'
 }
 
+type Member = {
+  id:number
+  email:string
+  name:string
+  class_number:number
+  class_letter:string
+}
+
 // ============================================================
 // SEGÉD KOMPONENSEK
 // ============================================================
@@ -192,17 +200,35 @@ function ElnokDashboard({ token }: { token: string | null }) {
   const [applications, setApplications] = useState<Application[]>([])
   const [applicationsLoading, setApplicationsLoading] = useState(true)
 
-  // TODO: events bekötése — GET /api/esemeny vagy GET /api/ido-events endpoint kész után
+   // TODO: events bekötése — GET /api/esemeny vagy GET /api/ido-events endpoint kész után
   // const [events, setEvents] = useState<Event[]>([])
   // const [eventsLoading, setEventsLoading] = useState(true)
 
-  // TODO: IDÖ tagok bekötése — GET /api/staff endpoint kész után
-  // const [staffMembers, setStaffMembers] = useState([])
-  // const [staffLoading, setStaffLoading] = useState(true)
+  const [members, setMembers] = useState<Member[]>([])
+  const [membersLoading, setMembersLoading] = useState(true)
 
   useEffect(() => {
     fetchApplications()
+    fetchMembers()
   }, [])
+
+  const fetchMembers = async () => {
+    setMembersLoading(true)
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/user/members`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      }
+    )
+    if (response.ok) {
+      const data = await response.json()
+      setMembers(data)
+    }
+    setMembersLoading(false)
+  }
 
   const fetchApplications = async () => {
     setApplicationsLoading(true)
@@ -354,8 +380,16 @@ function ElnokDashboard({ token }: { token: string | null }) {
           {/* IDÖ tagok */}
           <div>
             <p className="text-white font-bold mb-3">IDÖ tagok</p>
-            {/* TODO: staffMembers state-et bekötni — GET /api/staff endpoint kész után */}
-            <EmptyState message="Még nincs tag." />
+            {membersLoading ? (
+              <p className="text-white/60 text-sm">Betöltés...</p>
+            ) : members.length === 0 ? (
+              <EmptyState message="Még nincs IDÖ tag." />
+            ) : members.map(m => (
+              <div key={m.id} className="bg-white/10 rounded-xl px-4 py-3 mb-2">
+                <p className="text-white font-semibold">{m.name}</p>
+                <p className="text-white/60 text-sm">{m.class_number}.{m.class_letter} · {m.email}</p>
+              </div>
+            ))}
           </div>
 
         </div>
@@ -429,6 +463,26 @@ function DashboardContent() {
   const isIDO = user?.role === 'Idos' || user?.role === 'President'
   const isElnok = user?.role === 'President'
 
+  const fetchApplication = async () => {
+    setApplicationLoading(true)
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/application/${user?.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+      }
+    )
+    if (response.status === 404) {
+      setApplication(null)
+    } else {
+      const data = await response.json()
+      setApplication(data)
+    }
+    setApplicationLoading(false)
+  }
+
   // Profil adatok localStorage-ból
   useEffect(() => {
     const saved = localStorage.getItem('userProfile')
@@ -449,30 +503,12 @@ function DashboardContent() {
 
   // Auth guard
   useEffect(() => {
+    if (user?.role === 'Admin') router.push('/admin')
     if (!user) router.push('/login')
   }, [user])
 
+  if (user?.role === 'Admin') return null  // ← ez az új sor
   if (!user) return null
-
-  const fetchApplication = async () => {
-    setApplicationLoading(true)
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/application/${user?.id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
-      }
-    )
-    if (response.status === 404) {
-      setApplication(null)
-    } else {
-      const data = await response.json()
-      setApplication(data)
-    }
-    setApplicationLoading(false)
-  }
 
   const handleApply = async (motivacio: string, tapasztalat: string) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/application`, {

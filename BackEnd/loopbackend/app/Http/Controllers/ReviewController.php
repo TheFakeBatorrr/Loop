@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Review;
 use Illuminate\Http\Request;
 
+use function Laravel\Prompts\select;
+
 class ReviewController extends Controller
 {
     /**
@@ -15,6 +17,24 @@ class ReviewController extends Controller
     {
         $Review = Review::all();
         return response()->json($Review, 200, options:JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getMyReviews($id)
+    {
+        $myReviwes = Review::query()
+        ->join('events' , 'reviews.reviews_event_id' , '=' , 'events.id')
+        ->where('reviews_user_id' , $id)
+        ->select(
+            'events.id',
+            'events.name',
+            'events.topic',
+            'events.date',
+            'reviews.reqview',
+            'reviews.content',
+        )->get();
+
+        return response()->json($myReviwes , 200 , options:JSON_UNESCAPED_UNICODE);
+
     }
 
     /**

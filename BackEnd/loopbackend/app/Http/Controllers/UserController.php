@@ -17,7 +17,7 @@ class UserController extends Controller
         return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);   
     }
 
-    public function getStaff()
+    public function getMembers()
     {
         $staff = User::query()
         ->join('students' , 'users.id' , '=' , 'students.users_id' )
@@ -25,7 +25,6 @@ class UserController extends Controller
         ->select(
             'users.id',
             'users.email',
-            'users.role',
             'students.name',
             'students.class_number',
             'students.class_letter',
