@@ -11,7 +11,7 @@ const slides = [
   { img: '/assets/carousel/placeholder.jpg', label: 'Sportsnap 2025' },
 ]
 
-const topics = ['Sport', 'Kultúra', 'Tanulmány', 'Szórakozás', 'Egyéb']
+const topics = ['Sport' , 'Kultúra' , 'Tanulmány' , 'Továbbtanulás' , 'Iskolai élet' , 'Szórakozás' , 'Csapatépítés' , 'Egyéb']
 
 function useInView(threshold = 0.2) {
   const ref = useRef<HTMLDivElement>(null)

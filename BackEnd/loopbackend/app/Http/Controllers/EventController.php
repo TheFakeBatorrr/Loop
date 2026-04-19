@@ -104,7 +104,7 @@ class EventController extends Controller
             "name" => "required|string|max:60",
             "type" => "required|string|max:120",
             "status" => "required|string",
-            "topic" => "required|string|max:120",
+            "topic" => "required|string|in:Sport,Kultúra,Tanulmány,Továbbtanulás,Iskolai élet,Szórakozás,Csapatépítés,Egyéb",
             "target_audience" => "required|string|max:20",
             "date" => "required|date",
             "location" => "required|string|max:255",
@@ -115,6 +115,7 @@ class EventController extends Controller
         ],
         [
             "required" => ":attribute megadása kötelező!",
+            "in" => ":attribute scak előre megadott érték lehet",
             "string" => ":attribute mező szöveges lehet csak!",
             "integer"=> ":attribute mező szám típusu-nak kell lennie!",
             "max" => ":attribute :max hoszzú lehet!",
