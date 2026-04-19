@@ -45,6 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store');
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
+        Route::patch('/{id}/next-status', 'nextStatus');
+        Route::get('/elnok', 'elnokEvents');
+        Route::get('/archivum' , 'archivum');
     });
 
     // IDÖ ESEMÉNYEK

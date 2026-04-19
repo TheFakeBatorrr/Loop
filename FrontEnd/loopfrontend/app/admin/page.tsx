@@ -267,8 +267,6 @@ export default function AdminDashboard() {
     // TODO: elnök lekérése — GET /api/user?role=President vagy /api/getPresident endpoint kész után
     // const [president, setPresident] = useState<{ id: number, name: string } | null>(null)
 
-    // TODO: IDÖ tagok lekérése az elnök átadáshoz — GET /api/members kész után
-    // const [members, setMembers] = useState<Member[]>([])
 
     const [selectedNewPresident, setSelectedNewPresident] = useState<string>('')
 

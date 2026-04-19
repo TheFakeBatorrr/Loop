@@ -17,6 +17,84 @@ class EventController extends Controller
         return response()->json($Event, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
+    public function elnokEvents()
+    {
+        $events = Event::where('type', '!=', 'external')
+            ->whereNotIn('status', ['published', 'ended'])
+            ->get();
+
+        return response()->json($events, 200, options: JSON_UNESCAPED_UNICODE);
+    }
+
+    public function archivum()
+    {
+        $events = Event::query()
+            ->leftJoin('ido_events', 'events.id', '=', 'ido_events.ido_event_id')
+            ->where('events.status', 'ended')
+            ->where('events.type', '!=', 'external')
+            ->select(
+                'events.id',
+                'events.name',
+                'events.type',
+                'events.topic',
+                'events.date',
+                'events.location',
+                'events.max_capacity',
+                'events.target_audience',
+                'ido_events.id as ido_event_id',
+                'ido_events.revenue',
+                'ido_events.expanses',
+                'ido_events.main_organizer_id',
+            )
+            ->get();
+
+        return response()->json($events, 200, options: JSON_UNESCAPED_UNICODE);
+    }
+
+    public function nextStatus(string $id)
+    {
+        $event = Event::findOrFail($id);
+
+        $transitions = [
+            'external'   => [
+                'draft'     => 'published',
+                'published' => 'ended',
+            ],
+            'school_ido' => [
+                'draft'            => 'staff_gathering',
+                'staff_gathering'  => 'pending_review',
+                'pending_review'   => 'published',
+                'published'        => 'ended',
+            ],
+            'ido_only'   => [
+                'draft'     => 'published',
+                'published' => 'ended',
+            ],
+            'ido_school' => [
+                'draft'            => 'staff_gathering',
+                'staff_gathering'  => 'pending_review',
+                'pending_review'   => 'published',
+                'published'        => 'ended',
+            ],
+        ];
+
+        $nextStatus = $transitions[$event->type][$event->status] ?? null;
+
+        if (!$nextStatus) {
+            return response()->json([
+                'uzenet' => 'Nincs következő lépés vagy érvénytelen átmenet.'
+            ], 422, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $event->status = $nextStatus;
+        $event->save();
+
+        return response()->json([
+            'uzenet' => 'Státusz frissítve.',
+            'status' => $event->status,
+        ], 200, options: JSON_UNESCAPED_UNICODE);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

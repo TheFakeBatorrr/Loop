@@ -2,7 +2,13 @@ ide minden ötet szófosás gondolat
 
 todo:
 
-- Admin ha valahogy eljut a dashboard-ig akkor vigye őt a /admin-ra
+trigger backend-re hogy ha egy event státusz published és a dátum után vagyunk akkor magától legyen endedí azért csak ne keljen már manuálisan lezárni az eventeket.
+
+célcsoportot valahogy meg kéne oldani, mert lehet minden diák, X. évfolyam, Technikum, X.X oszátly stb és ezt stringből csúnya jól leszűrni + hibálanul kell hozzá gépelni
+
+Archivumhoz avg rating!
+
+admin-nél is működjön a státusz ugratás
 
 Gondolatok:
 -Kurva jó lenne egy panel view az archivált eventekre, ahol látszik az adott event típus, téma, avg rating, kik voltak még staffok (ez egy baszó query lesz), bevétel/kiadás, stb ami fontos lehet  
@@ -23,7 +29,10 @@ amit látnia kéne:
 - olyan eventek amire staff-ot gyűjtenek
 - archivált eventek
 
+Elnok:
 
+Admin:
+funkciók bekötése
 
 Profil:
 Student - semmi, mennyi értékelést addott le, milyen osztályos (ide csak a fetch-et kell bekötni meg a query kell)
