@@ -59,7 +59,7 @@ class UserController extends Controller
 
         return response()->json([
             "uzenet"=> "Sikeres diák feltöltés!",
-        ],200, options:JSON_UNESCAPED_UNICODE);
+        ],201, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -76,6 +76,25 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
 
+    }
+
+    public function newPresident($id)
+    {
+        // Ha van jelenlegi elnök, visszaminősítjük Idos-ra
+        $oldpres = User::where('role', 'President')->first();
+        if ($oldpres) {
+            $oldpres->role = 'Idos';
+            $oldpres->save();
+        }
+
+        $newpres = User::findOrFail($id);
+        if ($newpres->role !== 'Idos') {
+            return response()->json(['uzenet' => 'Csak IDÖ tag lehet elnök!'], 422, options: JSON_UNESCAPED_UNICODE);
+        }
+        $newpres->role = 'President';
+        $newpres->save();
+
+        return response()->json(['uzenet' => 'Elnöki pozíció átadva!'], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

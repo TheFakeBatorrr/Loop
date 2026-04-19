@@ -27,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
         Route::get('/members','getMembers');
+        Route::put('/newpresident/{id}','newPresidnet');
 
     });
 
