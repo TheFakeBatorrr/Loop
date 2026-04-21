@@ -45,7 +45,7 @@ class AuthController extends Controller
         $user = User::where("email", $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(["message" => "Gatya tesó, próbáld máshogy!"], 401);
+            return response()->json(["message" => "Gatya tesó, próbáld máshogy!"], 401 , options:JSON_UNESCAPED_UNICODE);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
@@ -62,6 +62,6 @@ class AuthController extends Controller
 
         return response()->json([
             "message" => "Sikeres kijelentkezés!"
-        ], 200);
+        ], 200 , options:JSON_UNESCAPED_UNICODE);
     }
 }

@@ -26,29 +26,83 @@ class EventController extends Controller
         return response()->json($events, 200, options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function archivum()
+    public function archivum(Request $request)
     {
-        $events = Event::query()
-            ->leftJoin('ido_events', 'events.id', '=', 'ido_events.ido_event_id')
-            ->where('events.status', 'ended')
-            ->where('events.type', '!=', 'external')
-            ->select(
-                'events.id',
-                'events.name',
-                'events.type',
-                'events.topic',
-                'events.date',
-                'events.location',
-                'events.max_capacity',
-                'events.target_audience',
-                'ido_events.id as ido_event_id',
-                'ido_events.revenue',
-                'ido_events.expanses',
-                'ido_events.main_organizer_id',
-            )
-            ->get();
+        $role = $request->user()->role;
 
-        return response()->json($events, 200, options: JSON_UNESCAPED_UNICODE);
+        $query = Event::query()
+            ->leftJoin('ido_events', 'events.id', '=', 'ido_events.ido_event_id')
+            ->leftJoin('reviews', 'events.id', '=', 'reviews.reviews_event_id')
+            ->where('events.status', 'ended')
+            ->selectRaw('
+                events.id,
+                events.name,
+                events.type,
+                events.topic,
+                events.date,
+                events.location,
+                events.max_capacity,
+                events.target_audience,
+                events.visibility,
+                ido_events.id as ido_event_id,
+                ido_events.revenue,
+                ido_events.expanses,
+                ido_events.main_organizer_id,
+                AVG(reviews.review) as avg_rating,
+                COUNT(reviews.id) as review_count
+            ')
+            ->groupBy(
+                'events.id', 'events.name', 'events.type', 'events.topic',
+                'events.date', 'events.location', 'events.max_capacity',
+                'events.target_audience', 'events.visibility',
+                'ido_events.id', 'ido_events.revenue',
+                'ido_events.expanses', 'ido_events.main_organizer_id'
+            );
+
+        // Admin nem látja az ido_only eventeket
+        if ($role === 'Admin') {
+            $query->where('events.type', '!=', 'ido_only');
+        } else {
+            // President és Idos nem látja az external eventeket
+            $query->where('events.type', '!=', 'external');
+        }
+
+        return response()->json($query->get(), 200, options: JSON_UNESCAPED_UNICODE);
+    }
+
+    public function userArchivum(Request $request)
+    {
+        $role = $request->user()->role;
+
+        $query = Event::query()
+            ->leftJoin('reviews', 'events.id', '=', 'reviews.reviews_events_id')
+            ->where('events.status', 'ended')
+            ->selectRaw('
+                events.id,
+                events.name,
+                events.type,
+                events.topic,
+                events.date,
+                events.location,
+                events.target_audience,
+                events.visibility,
+                AVG(reviews.review) as avg_rating
+            ')
+            ->groupBy(
+                'events.id', 'events.name', 'events.type', 'events.topic',
+                'events.date', 'events.location', 'events.target_audience',
+                'events.visibility'
+            );
+
+        // Student nem látja az ido_only eventeket
+        if ($role === 'Student') {
+            $query->where('events.type', '!=', 'ido_only');
+        }
+
+        // Mindenki nem látja az external eventeket
+        $query->where('events.type', '!=', 'external');
+
+        return response()->json($query->get(), 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     public function nextStatus(string $id)

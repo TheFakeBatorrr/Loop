@@ -54,7 +54,7 @@ export default function MainPage() {
       {/* HERO FELIRAT */}
       <AnimatedSection>
         <div className="pt-6 mb-24 text-center relative z-10">
-          <div className="bg-[#6034e3] max-w-5xl mx-auto rounded-2xl py-8 mb-[-60px]">
+          <div className="bg-[#6034e3] max-w-5xl mx-auto rounded-2xl py-8 mb-15">
             <h1 className="text-7xl md:text-9xl font-black text-white tracking-tight">Loop</h1>
             <p className="text-white/70 text-lg mt-2">A diákok rendszere</p>
           </div>
@@ -62,7 +62,7 @@ export default function MainPage() {
       </AnimatedSection>
 
       {/* CAROUSEL */}
-      <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden h-[600px] relative">
+      <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden h-150 relative">
         {slides.map((slide, i) => (
           <div
             key={i}

@@ -35,6 +35,25 @@ class UserController extends Controller
 
     }
 
+    public function getPresident()
+    {
+        $staff = User::query()
+        ->join('students' , 'users.id' , '=' , 'students.users_id' )
+        ->where('role','President')
+        ->select(
+            'users.id',
+            'users.role',
+            'users.email',
+            'students.name',
+            'students.class_number',
+            'students.class_letter',
+        )
+        ->get();
+
+        return response()->json($staff, 200, options:JSON_UNESCAPED_UNICODE);
+
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -85,6 +104,7 @@ class UserController extends Controller
         if ($oldpres) {
             $oldpres->role = 'Idos';
             $oldpres->save();
+            $oldpres->tokens()->delete();
         }
 
         $newpres = User::findOrFail($id);
@@ -93,6 +113,7 @@ class UserController extends Controller
         }
         $newpres->role = 'President';
         $newpres->save();
+        $newpres->tokens()->delete();
 
         return response()->json(['uzenet' => 'Elnöki pozíció átadva!'], 200, options: JSON_UNESCAPED_UNICODE);
     }

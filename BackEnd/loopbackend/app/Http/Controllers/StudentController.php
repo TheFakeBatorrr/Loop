@@ -49,7 +49,7 @@ class StudentController extends Controller
         $student = Student::where('users_id', $id)->first();
         
         if (!$student) {
-            return response()->json(["uzenet" => "Nem található"], 404);
+            return response()->json(["uzenet" => "Nem található"], 404, options:JSON_UNESCAPED_UNICODE);
         }
         
         return response()->json($student, 200);

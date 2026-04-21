@@ -23,7 +23,7 @@ class Ido_eventsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "ido_events_id" => "required|exists:events,id",
+            "ido_event_id" => "required|exists:events,id",
             "main_organizer_id" => "required|exists:users,id",
             "revenue" => "required|string",
             "expanses" => "required|string|",     

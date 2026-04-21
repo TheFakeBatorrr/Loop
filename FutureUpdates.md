@@ -1,1 +1,2 @@
 - smartphone app
+- light/dark theme

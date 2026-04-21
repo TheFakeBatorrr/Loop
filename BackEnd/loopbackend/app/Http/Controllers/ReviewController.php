@@ -19,6 +19,22 @@ class ReviewController extends Controller
         return response()->json($Review, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
+    private function getTrack(string $letter): string
+    {
+        return match(strtoupper($letter)) {
+            'A'     => 'real',
+            'B'     => 'info_tech',
+            'C', 'G'=> 'gazd_tech',
+            'D', 'F'=> 'real',
+            'E'     => 'kettannyelvu',
+            'H'     => 'human',
+            'I'     => 'info_tech',
+            default => 'unknown',
+        };
+
+        //$track = $this->getTrack($student->class_letter); <- helper method hívás
+    }
+
     public function getMyReviews($id)
     {
         $myReviwes = Review::query()
@@ -45,7 +61,7 @@ class ReviewController extends Controller
         $request->validate([
             "reviews_events_id" => "required|exists:events,id",
             "reviews_users_id" => "required|exists:users,id",
-            "review" => "required|integer|max:10|min:1",
+            "review" => "required|integer|max:5|min:1",
             "content" => "required|string|max:255",
             "date" => "required|date",
         ],

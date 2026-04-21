@@ -27,7 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
         Route::get('/members','getMembers');
-        Route::put('/newpresident/{id}','newPresidnet');
+        Route::get('/getpresident', 'getPresident');
+        Route::put('/newpresident/{id}','newPresident');
 
     });
 
@@ -49,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/{id}/next-status', 'nextStatus');
         Route::get('/elnok', 'elnokEvents');
         Route::get('/archivum' , 'archivum');
+        Route::get('/userarchivum', 'userArchivum');
     });
 
     // IDÖ ESEMÉNYEK
@@ -85,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store');
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
+        Route::get('/event/{event_id}', 'byEvent');
+        Route::get('/user/{user_id}/event/{event_id}', 'byUserAndEvent');
     });
 
 });

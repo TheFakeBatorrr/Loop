@@ -8,7 +8,7 @@ type View = 'choice' | 'register' | 'login' | 'profile'
 
 export default function Login() {
     const router = useRouter()
-    const { user, login: authLogin, logout: authLogout, token } = useAuth()
+    const { user, login: authLogin, logout: authLogout, token, authFetch } = useAuth()
 
     const [view, setView] = useState<View>('choice')
     const [showFirstLoginPopup, setShowFirstLoginPopup] = useState(false)
@@ -38,6 +38,7 @@ export default function Login() {
         }
     }, [user])
 
+    // Sima fetch — login előtt még nincs token
     const userLogin = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
             method: 'POST',
@@ -48,7 +49,7 @@ export default function Login() {
             body: JSON.stringify({ email, password, device_name: 'web' }),
         })
         const data = await response.json()
-        
+
         if (!response.ok) {
             alert('Helytelen email vagy jelszó!')
             setPassword("")
@@ -58,15 +59,16 @@ export default function Login() {
 
         authLogin(data.token, data.users)
 
-        if(data.users.role === 'Admin')
-        {
+        if (data.users.role === 'admin') {
             router.push('/admin')
             return
         }
 
-        await checkFirstLogin(data.users.id , data.token)
+        await checkFirstLogin(data.users.id, data.token)
     }
 
+    // checkFirstLogin — token már megvan de authFetch state még nem frissült,
+    // ezért itt még direktben adjuk át a tokent
     const checkFirstLogin = async (userId: number, token: string) => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student/${userId}`, {
             headers: {
@@ -86,6 +88,7 @@ export default function Login() {
         }
     }
 
+    // Sima fetch — regisztráció előtt nincs token
     const userRegister = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
             method: 'POST',
@@ -106,22 +109,20 @@ export default function Login() {
         setShowFirstLoginPopup(true)
     }
 
-
+    // authFetch — token már megvan (regisztráció után)
     const handlePopupSubmit = async () => {
         const [class_year, class_letter] = osztaly.split('.')
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 users_id: user?.id,
-                name: fullName, 
-                class_number: parseInt(class_year), 
-                class_letter: class_letter 
+                name: fullName,
+                class_number: parseInt(class_year),
+                class_letter: class_letter
             })
         })
 
@@ -134,12 +135,10 @@ export default function Login() {
         setProfileData({ fullName, osztaly })
         setShowFirstLoginPopup(false)
         router.push('/main')
-    }   
+    }
 
     const handleLogout = () => {
         authLogout()
-        localStorage.removeItem('userProfile')
-        localStorage.removeItem('hasLoggedInBefore')
         setView('choice')
     }
 
@@ -227,7 +226,7 @@ export default function Login() {
                         Bejelentkezés
                     </button>
                     <button
-                        onClick={() => { setView('register'); setEmail(''); setPassword(''); setUsername('');setPassword_confirmation('') }}
+                        onClick={() => { setView('register'); setEmail(''); setPassword(''); setUsername(''); setPassword_confirmation('') }}
                         style={{ color: "white" }}
                         className="py-2 rounded-xl border-white border w-fit mx-auto px-3"
                     >
@@ -305,18 +304,21 @@ export default function Login() {
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-gray-500 text-sm font-semibold">Leadott értékelések</span>
-                            <span className="font-bold text-[#171717]">3 db</span>
+                            {/* TODO: bekötni — GET /api/ertekeles/{userId} után */}
+                            <span className="font-bold text-[#171717]">—</span>
                         </div>
                     </div>
                     <div className="bg-[#111111] rounded-2xl p-6 flex flex-col gap-3">
                         <p className="text-white font-black text-lg mb-1">IDÖ profil</p>
                         <div className="flex justify-between items-center border-b border-white/10 pb-3">
                             <span className="text-white/60 text-sm font-semibold">Staff részvételek</span>
-                            <span className="font-bold text-white">7 db</span>
+                            {/* TODO: bekötni — staff részvétel lekérés után */}
+                            <span className="font-bold text-white">—</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-white/60 text-sm font-semibold">IDÖ-s évek</span>
-                            <span className="font-bold text-white">2 év</span>
+                            {/* TODO: bekötni — IDÖ-s évek számítás után */}
+                            <span className="font-bold text-white">—</span>
                         </div>
                     </div>
                     <button
