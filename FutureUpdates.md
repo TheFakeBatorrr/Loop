@@ -5,7 +5,7 @@ Mivel azt nem várjuk el, hogy a diákok is folyamatosan ezt a felületet figyel
 
 - okostelefon alkalmazás ( 2 verzió)
     - csak IDÖ tagoknak mert egy alkalmazást könyebben megynitunk mint egy weboldalt.
-    - kiterjeszteni a teljes diákságra és az admin felhasználóknak és teljesen  is.
+    - kiterjeszteni a teljes diákságra és az admin felhasználóknak is.
 - light/dark theme
 - válaszás funkció 
 - szuervezéssel kapcsolatos dokumentumok feltöltése / tárolása

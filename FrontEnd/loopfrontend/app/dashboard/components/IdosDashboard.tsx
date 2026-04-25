@@ -3,15 +3,32 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../components/AuthProvider'
 import IdosEsemenyKartya from './IdosEsemenyKartya'
+import IdosArchivKartya from './IdosArchivkartya'
 import type { Event, IdosPanel } from './types'
+
+type IdosArchivedEvent = {
+  id: number
+  name: string
+  type: string
+  topic: string
+  date: string
+  location: string
+  target_audience: string
+  main_organizer_name: string | null
+  avg_rating: number | null
+}
 
 type Props = { userId: number | undefined }
 
 export default function IdosDashboard({ userId }: Props) {
   const { authFetch } = useAuth()
   const [activePanel, setActivePanel] = useState<IdosPanel>(null)
+
   const [gatheringEvents, setGatheringEvents] = useState<Event[]>([])
   const [gatheringLoading, setGatheringLoading] = useState(true)
+
+  const [archivedEvents, setArchivedEvents] = useState<IdosArchivedEvent[]>([])
+  const [archivedLoading, setArchivedLoading] = useState(false)
 
   useEffect(() => { fetchGatheringEvents() }, [])
 
@@ -23,6 +40,13 @@ export default function IdosDashboard({ userId }: Props) {
       setGatheringEvents(data.filter(e => e.status === 'staff_gathering' && e.type !== 'external'))
     }
     setGatheringLoading(false)
+  }
+
+  const fetchArchivedEvents = async () => {
+    setArchivedLoading(true)
+    const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/esemeny/archivum`)
+    if (response.ok) setArchivedEvents(await response.json())
+    setArchivedLoading(false)
   }
 
   if (activePanel === 'esemenyek') {
@@ -53,7 +77,15 @@ export default function IdosDashboard({ userId }: Props) {
           <h2 className="text-white text-lg font-black">Archívum</h2>
           <button onClick={() => setActivePanel(null)} className="text-white/70 hover:text-white text-sm font-semibold">← Vissza</button>
         </div>
-        <p className="text-white/60 text-sm">Archívum hamarosan elérhető.</p>
+        {archivedLoading ? (
+          <p className="text-white/60 text-sm">Betöltés...</p>
+        ) : archivedEvents.length === 0 ? (
+          <p className="text-white/60 text-sm">Még nincs lezárt esemény.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {archivedEvents.map(e => <IdosArchivKartya key={e.id} event={e} />)}
+          </div>
+        )}
       </div>
     )
   }
@@ -79,7 +111,8 @@ export default function IdosDashboard({ userId }: Props) {
           <p className="text-white font-black text-lg">Események</p>
           <p className="text-white/60 text-sm mt-1">Staff gyűjtés alatt lévő események</p>
         </button>
-        <button onClick={() => setActivePanel('archivum')}
+        <button
+          onClick={() => { setActivePanel('archivum'); fetchArchivedEvents() }}
           className="bg-[#6034e3] rounded-2xl p-6 text-left hover:bg-[#8643eb] transition-all duration-300">
           <div className="text-3xl mb-3">📁</div>
           <p className="text-white font-black text-lg">Archívum</p>
