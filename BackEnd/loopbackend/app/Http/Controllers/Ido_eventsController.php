@@ -24,7 +24,7 @@ class Ido_eventsController extends Controller
     {
         $request->validate([
             "ido_event_id" => "required|exists:events,id",
-            "main_organizer_id" => "required|exists:users,id",
+            "main_organiser_id" => "nullable|exists:users,id",
             "revenue" => "string",
             "expanses" => "string",     
         ],
@@ -69,7 +69,7 @@ class Ido_eventsController extends Controller
             "string"   => ":attribute mező szöveges lehet csak!",
         ]);
 
-        $ido_events = Ido_events::find($id);
+        $ido_events = Ido_events::where('ido_event_id', $id)->first();
 
         if (!$ido_events) {
             return response()->json([

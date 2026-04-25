@@ -32,6 +32,20 @@ class StaffController extends Controller
             "in"       => ":attribute csak szervező vagy főszervező lehet!",
         ]);
 
+        // Ha főszervezőnek jelentkezik, ellenőrizzük van-e már elfogadott főszervező
+        if ($request->role === 'főszervező') {
+            $existing = Staff::where('staff_event_id', $request->staff_event_id)
+                ->where('role', 'főszervező')
+                ->where('accepted', true)
+                ->exists();
+
+            if ($existing) {
+                return response()->json([
+                    'uzenet' => 'Már van elfogadott főszervező erre az eseményre!'
+                ], 422, options: JSON_UNESCAPED_UNICODE);
+            }
+        }
+
         Staff::create([
             'staff_user_id'  => $request->staff_user_id,
             'staff_event_id' => $request->staff_event_id,

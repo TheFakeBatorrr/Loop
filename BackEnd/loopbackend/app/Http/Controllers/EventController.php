@@ -131,6 +131,7 @@ class EventController extends Controller
                 events.target_audience,
                 AVG(reviews.review) as avg_rating
             ')
+            ->where('event.topic' === $request->topic)
             ->groupBy(
                 'events.id', 'events.name', 'events.topic',
                 'events.date', 'events.location', 'events.target_audience',

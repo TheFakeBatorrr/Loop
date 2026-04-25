@@ -14,7 +14,7 @@ class Ido_events extends Model
 
     protected $fillable = [
         "ido_event_id",
-        "main_organizer_id",
+        "main_organiser_id",
         "revenue",
         "expanses"
     ];
