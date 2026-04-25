@@ -76,13 +76,15 @@ class Ido_applysController extends Controller
      */
     public function show(string $id)
     {
-        $application = Ido_applys::where('ido_applys_users_id', $id)->first();
-    
+        $application = Ido_applys::where('ido_applys_users_id', $id)
+            ->latest()
+            ->first();
+
         if (!$application) {
             return response()->json(null, 404);
         }
-        
-        return response()->json($application, 200, options:JSON_UNESCAPED_UNICODE);
+
+        return response()->json($application, 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

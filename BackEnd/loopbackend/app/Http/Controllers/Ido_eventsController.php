@@ -25,8 +25,8 @@ class Ido_eventsController extends Controller
         $request->validate([
             "ido_event_id" => "required|exists:events,id",
             "main_organizer_id" => "required|exists:users,id",
-            "revenue" => "required|string",
-            "expanses" => "required|string|",     
+            "revenue" => "string",
+            "expanses" => "string",     
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -59,10 +59,12 @@ class Ido_eventsController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            "revenue" => "required|string",
-            "expanses" => "required|string",     
+            "main_organiser_id" => "integer|exists:users,id",
+            "revenue" => "string",
+            "expanses" => "string",     
         ],
         [
+            "exists" => ":attribute nem létezik ilyen felhasználó!",
             "required" => ":attribute megadása kötelező!",
             "string"   => ":attribute mező szöveges lehet csak!",
         ]);
@@ -75,8 +77,12 @@ class Ido_eventsController extends Controller
             ], 404, options: JSON_UNESCAPED_UNICODE);
         }
 
-        $ido_events->revenue = $request->revenue;
-        $ido_events->expanses = $request->expanses;
+        $ido_events->fill(array_filter([
+            'main_organiser_id' => $request->main_organiser_id,
+            'revenue'           => $request->revenue,
+            'expanses'          => $request->expanses,
+        ], fn($v) => !is_null($v)));
+
         $ido_events->save();
 
         return response()->json([

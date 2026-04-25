@@ -165,24 +165,29 @@ class EventController extends Controller
             "max_capacity" => "required|integer",
             "visibility" => "required|string",
             "created_by" => "required|exists:users,id"
-
         ],
         [
             "required" => ":attribute megadása kötelező!",
-            "in" => ":attribute scak előre megadott érték lehet",
+            "in" => ":attribute csak előre megadott érték lehet",
             "string" => ":attribute mező szöveges lehet csak!",
-            "integer"=> ":attribute mező szám típusu-nak kell lennie!",
-            "max" => ":attribute :max hoszzú lehet!",
-            "min" => ":attribute :min hosszunak kell lennie!",
+            "integer"=> ":attribute mező szám típusú kell legyen!",
+            "max" => ":attribute :max hosszú lehet!",
+            "min" => ":attribute :min hosszúnak kell lennie!",
             "date" => ":attribute csak dátum lehet!",
             "exists" => ":attribute nem létezik!",
         ]); 
 
-        Event::create($request->all());
+        $event = Event::create($request->all());
+
+        if (in_array($event->type, ['ido_only', 'ido_school', 'school_ido'])) {
+            \App\Models\Ido_events::create([
+                'ido_event_id' => $event->id,
+            ]);
+        }
 
         return response()->json([
-            "uzenet"=> "Sikeres esemény létrehozás!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+            "uzenet" => "Sikeres esemény létrehozás!",
+        ], 201, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

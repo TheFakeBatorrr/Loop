@@ -39,8 +39,6 @@ type Event = {
   created_by: number
 }
 
-// Archívum esemény — joined events + ido_events flat lekérdezés
-// GET /api/esemeny/archivum — leftJoin ido_events-szel
 type ArchivedEvent = {
   id: number
   name: string
@@ -70,6 +68,17 @@ type StaffApplication = {
   staff_event_id: number
   role: string
   accepted: boolean
+}
+
+type StaffApplicant = {
+  id: number
+  staff_user_id: number
+  staff_event_id: number
+  role: string
+  accepted: boolean
+  name: string
+  class_number: number
+  class_letter: string
 }
 
 // ============================================================
@@ -291,6 +300,115 @@ function UjEsemenyModal({ onClose, onCreated, userId }: {
 }
 
 // ============================================================
+// STAFF JELENTKEZŐ KÁRTYA (elnök POV — egy esemény staffja)
+// ============================================================
+
+function StaffJelentkezoKartya({
+  applicant,
+  event,
+  onUpdated,
+}: {
+  applicant: StaffApplicant
+  event: Event
+  onUpdated: () => void
+}) {
+  const { authFetch } = useAuth()
+  const [loading, setLoading] = useState(false)
+
+  const handleAccept = async () => {
+    setLoading(true)
+
+    // 1. Staff jelentkezés elfogadása
+    const staffRes = await authFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/staff/${applicant.id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accepted: true }),
+      }
+    )
+    if (!staffRes.ok) { alert('Hiba a staff elfogadásakor!'); setLoading(false); return }
+
+    // 2. Ha főszervező: beállítjuk main_organiser_id-t az ido_events-ben
+    if (applicant.role === 'főszervező') {
+      const idoRes = await authFetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/ido-events/${event.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ main_organiser_id: applicant.staff_user_id }),
+        }
+      )
+      if (!idoRes.ok) {
+        alert('Staff elfogadva, de a főszervező beállítása sikertelen!')
+      }
+    }
+
+    setLoading(false)
+    onUpdated()
+  }
+
+  const handleReject = async () => {
+    setLoading(true)
+    const res = await authFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/staff/${applicant.id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accepted: false }),
+      }
+    )
+    if (!res.ok) { alert('Hiba az elutasításkor!'); setLoading(false); return }
+    setLoading(false)
+    onUpdated()
+  }
+
+  return (
+    <div className="bg-white/10 rounded-xl px-4 py-3">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <p className="text-white font-semibold">{applicant.name}</p>
+          <p className="text-white/60 text-sm">
+            {applicant.class_number}.{applicant.class_letter} ·{' '}
+            <span className={applicant.role === 'főszervező' ? 'text-yellow-300 font-semibold' : 'text-white/60'}>
+              {applicant.role === 'főszervező' ? '👑 Főszervező' : 'Szervező'}
+            </span>
+          </p>
+        </div>
+        <span
+          className={`text-xs px-2 py-1 rounded-full font-semibold ${
+            applicant.accepted
+              ? 'bg-green-400/20 text-green-300'
+              : 'bg-yellow-400/20 text-yellow-300'
+          }`}
+        >
+          {applicant.accepted ? 'Elfogadva' : 'Várakozik'}
+        </span>
+      </div>
+
+      {!applicant.accepted && (
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={handleReject}
+            disabled={loading}
+            className="flex-1 border border-red-400 text-red-300 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-400 hover:text-white transition-all disabled:opacity-40"
+          >
+            Elutasít
+          </button>
+          <button
+            onClick={handleAccept}
+            disabled={loading}
+            className="flex-1 bg-green-500 text-white py-1.5 rounded-lg text-sm font-semibold hover:bg-green-600 transition-all disabled:opacity-40"
+          >
+            {loading ? '...' : 'Elfogad'}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ============================================================
 // ESEMÉNY KÁRTYA (elnök POV — lenyitható, folyamatban lévő)
 // ============================================================
 
@@ -302,8 +420,24 @@ function EsemenyKartya({ event, onStatusUpdate }: {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // ido_only: draft → published
-  // ido_school / school_ido: draft → staff_gathering → pending_review (admin jóváhagyja)
+  const [staffApplicants, setStaffApplicants] = useState<StaffApplicant[]>([])
+  const [staffLoading, setStaffLoading] = useState(false)
+
+  useEffect(() => {
+    if (open && event.status === 'staff_gathering') {
+      fetchStaff()
+    }
+  }, [open, event.status])
+
+  const fetchStaff = async () => {
+    setStaffLoading(true)
+    const res = await authFetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/staff/event/${event.id}`
+    )
+    if (res.ok) setStaffApplicants(await res.json())
+    setStaffLoading(false)
+  }
+
   const getNextLabel = (): string | null => {
     if (event.type === 'ido_only') {
       if (event.status === 'draft') return 'Publikálás'
@@ -368,12 +502,25 @@ function EsemenyKartya({ event, onStatusUpdate }: {
             </div>
           </div>
 
-          {/* Staff gyűjtés szekció — csak staff_gathering státusznál */}
           {event.status === 'staff_gathering' && (
             <div className="bg-white/5 rounded-xl p-3">
-              <p className="text-white/80 text-sm font-semibold mb-2">Staff jelentkezők</p>
-              {/* TODO: staff jelentkezők lekérése — GET /api/staff/event/{id} bekötése után */}
-              <p className="text-white/50 text-sm">Még nincs staff jelentkező.</p>
+              <p className="text-white/80 text-sm font-semibold mb-3">Staff jelentkezők</p>
+              {staffLoading ? (
+                <p className="text-white/50 text-sm">Betöltés...</p>
+              ) : staffApplicants.length === 0 ? (
+                <p className="text-white/50 text-sm">Még nincs staff jelentkező.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {staffApplicants.map(a => (
+                    <StaffJelentkezoKartya
+                      key={a.id}
+                      applicant={a}
+                      event={event}
+                      onUpdated={fetchStaff}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -479,7 +626,6 @@ function ArchivKartya({ event, onSaved }: {
       )
       if (!response.ok) { setError('Hiba történt a mentés során.'); setLoading(false); return }
     } else {
-      // TODO: main_organizer_id bekötése ha az elnök kiválasztja a főszervezőt
       const response = await authFetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/ido-events`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ido_event_id: event.id, revenue, expanses }) }
@@ -600,7 +746,6 @@ function IdosEsemenyKartya({ event, userId }: {
   const [existingApplication, setExistingApplication] = useState<StaffApplication | null | 'loading'>('loading')
   const [applying, setApplying] = useState(false)
 
-  // Ellenőrzés: már jelentkezett-e erre az eseményre
   useEffect(() => {
     if (!userId) return
     checkApplication()
@@ -638,7 +783,6 @@ function IdosEsemenyKartya({ event, userId }: {
       return <p className="text-white/50 text-sm">Betöltés...</p>
     }
 
-    // Már jelentkezett
     if (existingApplication !== null) {
       return (
         <div className="bg-white/5 rounded-xl p-3">
@@ -655,8 +799,6 @@ function IdosEsemenyKartya({ event, userId }: {
       )
     }
 
-    // Nem jelentkezett még
-    // ido_school esetén főszervező + szervező gomb, egyébként csak szervező
     if (event.type === 'ido_school') {
       return (
         <div className="flex flex-col gap-2">
@@ -681,7 +823,6 @@ function IdosEsemenyKartya({ event, userId }: {
       )
     }
 
-    // ido_only és school_ido — csak szervező
     return (
       <button
         onClick={() => handleApply('szervező')}
@@ -746,8 +887,6 @@ function IdosDashboard({ userId }: { userId: number | undefined }) {
   const { authFetch } = useAuth()
   const [activePanel, setActivePanel] = useState<IdosPanel>(null)
 
-  // Staff gyűjtés alatt lévő események — GET /api/esemeny/elnok szűrve staff_gathering-re
-  // TODO: ha lesz dedikált /api/esemeny/idos endpoint, cseréld le
   const [gatheringEvents, setGatheringEvents] = useState<Event[]>([])
   const [gatheringLoading, setGatheringLoading] = useState(true)
 
@@ -760,13 +899,11 @@ function IdosDashboard({ userId }: { userId: number | undefined }) {
     const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/esemeny`)
     if (response.ok) {
       const data: Event[] = await response.json()
-      // Csak staff_gathering státuszú és nem external típusú eventek
       setGatheringEvents(data.filter(e => e.status === 'staff_gathering' && e.type !== 'external'))
     }
     setGatheringLoading(false)
   }
 
-  // ── Események panel ──
   if (activePanel === 'esemenyek') {
     return (
       <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -791,7 +928,6 @@ function IdosDashboard({ userId }: { userId: number | undefined }) {
     )
   }
 
-  // ── Archívum panel ──
   if (activePanel === 'archivum') {
     return (
       <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -799,13 +935,11 @@ function IdosDashboard({ userId }: { userId: number | undefined }) {
           <h2 className="text-white text-lg font-black">Archívum</h2>
           <button onClick={() => setActivePanel(null)} className="text-white/70 hover:text-white text-sm font-semibold">← Vissza</button>
         </div>
-        {/* TODO: IDÖ tag archívum bekötése — GET /api/esemeny/userarchivum után */}
         <EmptyState message="Archívum hamarosan elérhető." />
       </div>
     )
   }
 
-  // ── Főnézet: 2 panel ──
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3 mb-1">
@@ -855,13 +989,11 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
   const [members, setMembers] = useState<Member[]>([])
   const [membersLoading, setMembersLoading] = useState(true)
 
-  // Aktív elnöki események — GET /api/esemeny/elnok
   const [events, setEvents] = useState<Event[]>([])
   const [eventsLoading, setEventsLoading] = useState(true)
 
   const [publishedEvents, setPublishedEvents] = useState<Event[]>([])
 
-  // Archív események — GET /api/esemeny/archivum
   const [archivedEvents, setArchivedEvents] = useState<ArchivedEvent[]>([])
   const [archivedLoading, setArchivedLoading] = useState(true)
 
@@ -893,7 +1025,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
     setEventsLoading(false)
   }
 
-  // TODO: ha lesz dedikált endpoint, cseréld le
   const fetchPublishedEvents = async () => {
     const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/esemeny`)
     if (response.ok) {
@@ -916,6 +1047,7 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
     )
     if (!response.ok) { alert('Hiba történt az elfogadás során!'); return }
     await fetchApplications()
+    await fetchMembers()
   }
 
   const handleDecline = async (application: Application) => {
@@ -929,7 +1061,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
 
   const pendingCount = applications.length
 
-  // ── Események panel ──
   if (activePanel === 'esemenyek') {
     return (
       <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -946,7 +1077,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
           + Új esemény létrehozása
         </button>
 
-        {/* Folyamatban lévő — draft, staff_gathering, pending_review */}
         <div className="mb-5">
           <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-3">Folyamatban lévő eseményeid</p>
           {eventsLoading ? (
@@ -962,7 +1092,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
           )}
         </div>
 
-        {/* Publikált — csak olvasható */}
         {publishedEvents.length > 0 && (
           <div>
             <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-3">Aktív / publikált események</p>
@@ -977,7 +1106,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
     )
   }
 
-  // ── Archívum panel ──
   if (activePanel === 'archivum') {
     return (
       <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -1001,7 +1129,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
     )
   }
 
-  // ── Staff panel ──
   if (activePanel === 'staff') {
     return (
       <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -1066,7 +1193,6 @@ function ElnokDashboard({ userId }: { userId: number | undefined }) {
     )
   }
 
-  // ── Főnézet: 3 panel ──
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3 mb-1">
@@ -1128,7 +1254,6 @@ function DashboardContent() {
   const [application, setApplication] = useState<Application | null>(null)
   const [applicationLoading, setApplicationLoading] = useState(true)
 
-  // FONTOS: role értékek — 'Admin', 'President', 'Idos', 'Student'
   const isIDO = user?.role === 'Idos' || user?.role === 'President'
   const isElnok = user?.role === 'President'
   const isIdosTag = user?.role === 'Idos'
@@ -1144,25 +1269,21 @@ function DashboardContent() {
     setApplicationLoading(false)
   }
 
-  // Profil adatok localStorage-ból
   useEffect(() => {
     const saved = localStorage.getItem('userProfile')
     if (saved) setProfileData(JSON.parse(saved))
   }, [])
 
-  // Tab query param kezelés
   useEffect(() => {
     const tab = searchParams.get('tab')
     if (tab === 'reviews') setView('reviews')
   }, [searchParams])
 
-  // Diák IDÖ jelentkezés lekérése
   useEffect(() => {
     if (!user || isIDO) return
     fetchApplication()
   }, [user])
 
-  // Auth guard — Admin → /admin, nincs user → /login
   useEffect(() => {
     if (user?.role === 'Admin') router.push('/admin')
     if (!user) router.push('/login')
@@ -1183,13 +1304,10 @@ function DashboardContent() {
   }
 
   const renderIDOPanel = () => {
-    // Elnök
     if (isElnok) return <ElnokDashboard userId={user?.id} />
 
-    // IDÖ tag
     if (isIdosTag) return <IdosDashboard userId={user?.id} />
 
-    // Betöltés
     if (applicationLoading) {
       return (
         <div className="bg-[#6034e3] rounded-2xl p-6 flex items-center justify-center py-10">
@@ -1198,7 +1316,6 @@ function DashboardContent() {
       )
     }
 
-    // Függő jelentkezés
     if (application?.accepted === 'Pending') {
       return (
         <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -1211,7 +1328,6 @@ function DashboardContent() {
       )
     }
 
-    // Student — csatlakozás panel
     return (
       <div className="bg-[#6034e3] rounded-2xl p-6">
         {application?.accepted === 'Rejected' && (
@@ -1239,8 +1355,6 @@ function DashboardContent() {
       )}
 
       <div className="max-w-5xl mx-auto">
-
-        {/* Fejléc */}
         <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-black text-[#6034e3]">Irányítópult</h1>
@@ -1248,12 +1362,10 @@ function DashboardContent() {
           </div>
         </div>
 
-        {/* Compact view */}
         {view === 'compact' && (
           <div className="flex flex-col gap-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <h2 className="text-lg font-bold text-[#171717] mb-4">Legutóbbi 3 értékelésem</h2>
-              {/* TODO: bekötni — GET /api/ertekeles endpoint kész után */}
               <p className="text-gray-400 text-sm">Még nincs értékelés.</p>
               <button onClick={() => setView('reviews')}
                 className="mt-4 border-2 border-[#6034e3] text-[#6034e3] px-4 py-2 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all duration-300 w-full">
@@ -1264,18 +1376,15 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Reviews view */}
         {view === 'reviews' && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-[#171717]">Összes értékelésem</h2>
               <button onClick={() => setView('compact')} className="text-[#6034e3] font-semibold hover:underline text-sm">← Vissza</button>
             </div>
-            {/* TODO: bekötni — GET /api/ertekeles/{userId} endpoint kész után */}
             <p className="text-gray-400 text-sm">Még nincs értékelés.</p>
           </div>
         )}
-
       </div>
     </main>
   )
