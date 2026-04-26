@@ -77,7 +77,7 @@ export default function SelloutPage() {
         </div>
         <div className="relative z-10 animate-[fadeInUp_0.8s_ease_forwards]">
           <p className="text-white/70 text-lg mb-4 tracking-widest uppercase">Bemutatkozik a</p>
-          <h1 className="text-6xl md:text-8xl font-black mb-6">Loop</h1>
+          <h1 className="text-6xl md:text-8xl font-black mb-6">Boundless</h1>
           <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto mb-10">
             A diákönkormányzat digitális otthona. Egy platform, ahol minden diák hangja számít.
           </p>

@@ -17,9 +17,9 @@ export default function Navbar() {
   const {user} = useAuth()
 
   const links = [
-  { href: '/main', label: 'Loop' },
+  { href: '/main', label: 'Főoldal' },
   ...(user ? [{ href: '/dashboard', label: 'Irányítópult' }] : []),
-  { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
+  { href: '/sellout', label: 'A Boundless-ről' },
 ]
   
   return (
@@ -28,7 +28,7 @@ export default function Navbar() {
 
         {/* Logo balra */}
         <Link href="/">
-          <Image src={Logo} priority alt="Loop logo" height={55} width={55} />
+          <Image src={Logo} priority alt="Boundless logo" height={55} width={55} />
         </Link>
 
         {/* Linkek középen */}

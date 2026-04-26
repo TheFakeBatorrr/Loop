@@ -25,12 +25,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token')
-    if (!savedToken) { setInitialized(true); return }
-    setToken(savedToken)
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) setUser(JSON.parse(savedUser))
-    setInitialized(true)
+  const savedToken = localStorage.getItem('token')
+  if (!savedToken) { setInitialized(true); return }
+  setToken(savedToken)
+
+  fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${savedToken}`,
+    }
+  })
+    .then(res => res.ok ? res.json() : null)
+    .then(freshUser => {
+      if (freshUser) {
+        setUser(freshUser)
+        localStorage.setItem('user', JSON.stringify(freshUser))
+      } else {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
+      setInitialized(true)
+    })
+    .catch(() => {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      setInitialized(true)
+    })
   }, [])
 
   const login = (token: string, user: User) => {

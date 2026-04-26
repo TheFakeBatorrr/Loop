@@ -76,11 +76,12 @@ export default function IdosEsemenyKartya({ event, userId }: Props) {
     await fetchAllStaff()
   }
 
-  const hasAcceptedFoszervezo = allStaff.some(s => s.role === 'főszervező' && Boolean(s.accepted))
-  const iAmFoszervezo = allStaff.some(s => s.staff_user_id === userId && s.role === 'főszervező' && Boolean(s.accepted))
+  const hasAcceptedFoszervezo = allStaff.some(s => s.role === 'főszervező' && s.accepted)
+  const iAmFoszervezo = allStaff.some(s => s.staff_user_id === userId && s.role === 'főszervező' && s.accepted)
 
-  const szorvezokPending = allStaff.filter(s => s.role === 'szervező' && s.accepted === false)
-  const szervezokAccepted = allStaff.filter(s => s.role === 'szervező' && s.accepted === true)
+  const szorvezokPending = allStaff.filter(s => s.role === 'szervező' && s.accepted === null)
+  const szervezokAccepted = allStaff.filter(s => s.role === 'szervező' && Boolean(s.accepted))
+  const szervezokRejected = allStaff.filter(s => s.role === 'szervező' && s.accepted === false)
 
   const renderJelentkezesGomb = () => {
     if (loading) {

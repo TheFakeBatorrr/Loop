@@ -162,7 +162,7 @@ export default function Login() {
                             type="text"
                             placeholder="Osztályod (pl. 12.A)"
                             value={osztaly}
-                            onChange={e => setOsztaly(e.target.value)}
+                            onChange={e => setOsztaly(e.target.value.toUpperCase())}
                             className="border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#6034e3] transition-all"
                         />
                         <button

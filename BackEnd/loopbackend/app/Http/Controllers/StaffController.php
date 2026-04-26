@@ -50,7 +50,7 @@ class StaffController extends Controller
             'staff_user_id'  => $request->staff_user_id,
             'staff_event_id' => $request->staff_event_id,
             'role'           => $request->role,
-            'accepted'       => 0,
+            'accepted'       => null,
         ]);
 
         return response()->json(['uzenet' => 'Sikeres staff jelentkezés!'], 200, options: JSON_UNESCAPED_UNICODE);

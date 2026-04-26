@@ -7,6 +7,7 @@ Mivel azt nem várjuk el, hogy a diákok is folyamatosan ezt a felületet figyel
     - csak IDÖ tagoknak mert egy alkalmazást könyebben megynitunk mint egy weboldalt.
     - kiterjeszteni a teljes diákságra és az admin felhasználóknak is.
 - light/dark theme
-- válaszás funkció 
+- elnök válaszás funkció 
 - szuervezéssel kapcsolatos dokumentumok feltöltése / tárolása
 - privát és csoportos üzenetek
+- archívum szűrők
