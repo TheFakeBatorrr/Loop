@@ -20,8 +20,7 @@ use App\Models\User;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
-
-
+// EMAIL VERIFY (nem védett, csak signed)
 Route::get('/email/verify/{id}/{hash}', function($id, $hash) {
     $user = User::findOrFail($id);
 
@@ -39,29 +38,23 @@ Route::get('/email/verify/{id}/{hash}', function($id, $hash) {
     return response()->json(['message' => 'Email sikeresen verifikálva!'], 200);
 })->middleware('signed')->name('verification.verify');
 
+// EMAIL RESEND (auth de verified nélkül)
+Route::middleware(['auth:sanctum', 'throttle:6,1'])->post('/email/resend', function (Request $request) {
+    if ($request->user()->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email már verifikálva!'], 200);
+    }
+    $request->user()->sendEmailVerificationNotification();
+    return response()->json(['uzenet' => 'Email elküldve!'], 200);
+});
 
-
-
-
-// VÉDETT ÚTVONALAK
-Route::middleware('auth:sanctum')->group(function () {
-
-    //email
-    Route::post('/email/resend', function(Request $request) {
-        if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email már verifikálva!'], 200);
-        }
-        $request->user()->sendEmailVerificationNotification();
-        return response()->json(['message' => 'Verifikációs email elküldve!'], 200);
-    });
-
+// VÉDETT ÚTVONALAK (auth + verified)
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     // AUTH
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', function (Request $request) {
         return response()->json($request->user());
     });
-    
 
     // USERS
     Route::prefix('user')->controller(UserController::class)->group(function () {
@@ -72,7 +65,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/members','getMembers');
         Route::get('/getpresident', 'getPresident');
         Route::put('/newpresident/{id}','newPresident');
-
     });
 
     // ÉRTÉKELÉSEK
@@ -91,6 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
         Route::patch('/{id}/next-status', 'nextStatus');
+        Route::patch('/{id}/reject-status', 'rejectStatus');
         Route::get('/elnok', 'elnokEvents');
         Route::get('/archivum' , 'archivum');
         Route::get('/userarchivum', 'userArchivum');

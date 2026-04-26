@@ -48,7 +48,6 @@ export default function Login() {
             },
             body: JSON.stringify({ email, password, device_name: 'web' }),
         })
-        const data = await response.json()
 
         if (!response.ok) {
             alert('Helytelen email vagy jelszó!')
@@ -57,9 +56,18 @@ export default function Login() {
             return
         }
 
+        const data = await response.json()
+
+        // Email nincs verifikálva
+        if (!data.users.email_verified_at) {
+            authLogin(data.token, data.users)
+            router.push('/main/verify-email?pending=1')
+            return
+        }
+
         authLogin(data.token, data.users)
 
-        if (data.users.role === 'admin') {
+        if (data.users.role === 'Admin') {
             router.push('/admin')
             return
         }
@@ -106,7 +114,7 @@ export default function Login() {
         }
 
         authLogin(data.token, data.diak)
-        setShowFirstLoginPopup(true)
+        router.push('/main/verify-email?pending=1')
     }
 
     // authFetch — token már megvan (regisztráció után)
