@@ -25,11 +25,14 @@ class AuthController extends Controller
             "password" => $request->password
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
+            "message" => "Regisztráció sikeres! Ellenőrizd az emailed!",
             "token" => $token,
-            "diak" => $user
+            "user" => $user
         ], 201);
     }
 

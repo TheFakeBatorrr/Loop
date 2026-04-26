@@ -9,21 +9,59 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use Illuminate\Container\Attributes\Auth;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
+use Illuminate\Auth\Events\Verified;
+use App\Models\User;
 
 // AUTH (nem védett)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+
+
+Route::get('/email/verify/{id}/{hash}', function($id, $hash) {
+    $user = User::findOrFail($id);
+
+    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        return response()->json(['message' => 'Érvénytelen verifikációs link!'], 403);
+    }
+
+    if ($user->hasVerifiedEmail()) {
+        return response()->json(['message' => 'Email már verifikálva!'], 200);
+    }
+
+    $user->markEmailAsVerified();
+    event(new Verified($user));
+
+    return response()->json(['message' => 'Email sikeresen verifikálva!'], 200);
+})->middleware('signed')->name('verification.verify');
+
+
+
+
+
 // VÉDETT ÚTVONALAK
 Route::middleware('auth:sanctum')->group(function () {
+
+    //email
+    Route::post('/email/resend', function(Request $request) {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email már verifikálva!'], 200);
+        }
+        $request->user()->sendEmailVerificationNotification();
+        return response()->json(['message' => 'Verifikációs email elküldve!'], 200);
+    });
+
 
     // AUTH
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', function (Request $request) {
         return response()->json($request->user());
     });
+    
 
     // USERS
     Route::prefix('user')->controller(UserController::class)->group(function () {
