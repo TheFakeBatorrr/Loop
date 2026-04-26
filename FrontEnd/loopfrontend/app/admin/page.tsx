@@ -25,8 +25,7 @@ type Event = {
     created_by: number
 }
 
-// Archív esemény — joined events + ido_events + avg_rating
-// GET /api/esemeny/archivum
+
 type ArchivedEvent = {
     id: number
     name: string
@@ -36,10 +35,9 @@ type ArchivedEvent = {
     location: string
     max_capacity: number
     target_audience: string
-    ido_event_id: number | null
-    revenue: string | null
-    expanses: string | null
-    main_organizer_id: number | null
+    main_organizer_name: string | null
+    main_organiser_class_number: number | null
+    main_organiser_class_letter: string | null
     avg_rating: number | null
     review_count: number
 }
@@ -259,156 +257,73 @@ function UjEsemenyModal({ onClose, onCreated, userId }: {
 // ARCHÍV KÁRTYA (admin POV — bevétel/kiadás + avg rating)
 // ============================================================
 
-function ArchivKartya({ event, onSaved }: {
-    event: ArchivedEvent
-    onSaved: () => void
-}) {
-    const { authFetch } = useAuth()
+function ArchivKartya({ event }: { event: ArchivedEvent }) {
+  const [open, setOpen] = useState(false)
 
-    const [open, setOpen] = useState(false)
-    const [editing, setEditing] = useState(false)
-    const [revenue, setRevenue] = useState(event.revenue ?? '')
-    const [expanses, setExpanses] = useState(event.expanses ?? '')
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-
-    const hasIdoData = event.ido_event_id !== null
-
-    const handleSave = async () => {
-        setLoading(true)
-        setError(null)
-
-        if (hasIdoData) {
-            // Van már ido_events sor — PUT /api/ido-events/{ido_event_id}
-            const response = await authFetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/ido-events/${event.ido_event_id}`,
-                {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ revenue, expanses }),
-                }
-            )
-            if (!response.ok) { setError('Hiba történt a mentés során.'); setLoading(false); return }
-        } else {
-            // Még nincs ido_events sor — POST /api/ido-events
-            // TODO: main_organizer_id bekötése ha az elnök kiválasztja a főszervezőt
-            const response = await authFetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/ido-events`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ido_event_id: event.id, revenue, expanses }),
-                }
-            )
-            if (!response.ok) { setError('Hiba történt a mentés során.'); setLoading(false); return }
-        }
-
-        setLoading(false)
-        setEditing(false)
-        onSaved()
-    }
-
-    return (
-        <div className="border border-gray-100 rounded-xl overflow-hidden">
-            <button onClick={() => setOpen(!open)}
-                className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-gray-50 transition-all">
-                <div className="flex flex-col gap-0.5">
-                    <p className="font-bold text-[#171717]">{event.name}</p>
-                    <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-xs">{typeLabel[event.type]}</span>
-                        <span className="text-gray-300 text-xs">·</span>
-                        <span className="text-gray-400 text-xs">{event.date}</span>
-                        {event.avg_rating !== null && (
-                            <>
-                                <span className="text-gray-300 text-xs">·</span>
-                                <span className="text-yellow-500 text-xs font-semibold">★ {Number(event.avg_rating).toFixed(1)} ({event.review_count})</span>
-                            </>
-                        )}
-                    </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                    {!hasIdoData && (
-                        <span className="bg-orange-100 text-orange-500 text-xs px-2 py-1 rounded-full font-semibold">Hiányos</span>
-                    )}
-                    <span className="text-gray-400 text-xs">{open ? '▲' : '▼'}</span>
-                </div>
-            </button>
-
-            {open && (
-                <div className="px-4 pb-4 flex flex-col gap-3 border-t border-gray-100 pt-3">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Téma</p>
-                            <p className="text-[#171717]">{event.topic}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Célcsoport</p>
-                            <p className="text-[#171717]">{event.target_audience}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Helyszín</p>
-                            <p className="text-[#171717]">{event.location}</p>
-                        </div>
-                        <div>
-                            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Max férőhely</p>
-                            <p className="text-[#171717]">{event.max_capacity} fő</p>
-                        </div>
-                    </div>
-
-                    {/* Pénzügyi szekció */}
-                    <div className="bg-gray-50 rounded-xl p-3">
-                        <div className="flex items-center justify-between mb-3">
-                            <p className="text-[#171717] text-sm font-semibold">Pénzügyek</p>
-                            {!editing && (
-                                <button onClick={() => setEditing(true)}
-                                    className="text-[#6034e3] text-xs font-semibold hover:underline transition-all">
-                                    ✏️ Szerkesztés
-                                </button>
-                            )}
-                        </div>
-
-                        {editing ? (
-                            <div className="flex flex-col gap-2">
-                                {error && <p className="text-red-500 text-xs">{error}</p>}
-                                <div>
-                                    <label className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-1 block">Bevétel</label>
-                                    <input type="text" value={revenue} onChange={e => setRevenue(e.target.value)} placeholder="pl. 50000"
-                                        className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#6034e3] transition-all" />
-                                </div>
-                                <div>
-                                    <label className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-1 block">Kiadás</label>
-                                    <input type="text" value={expanses} onChange={e => setExpanses(e.target.value)} placeholder="pl. 30000"
-                                        className="w-full border-2 border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#6034e3] transition-all" />
-                                </div>
-                                <div className="flex gap-2 mt-1">
-                                    <button onClick={() => { setEditing(false); setError(null) }}
-                                        className="flex-1 border border-gray-200 text-gray-500 py-1.5 rounded-lg text-sm font-semibold hover:border-gray-300 transition-all">
-                                        Mégse
-                                    </button>
-                                    <button onClick={handleSave} disabled={loading}
-                                        className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-all
-                                            ${loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#6034e3] text-white hover:bg-[#8643eb]'}`}>
-                                        {loading ? 'Mentés...' : 'Mentés'}
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Bevétel</p>
-                                    <p className="text-[#171717] font-semibold">{event.revenue ?? '—'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Kiadás</p>
-                                    <p className="text-[#171717] font-semibold">{event.expanses ?? '—'}</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+  return (
+    <div className="border border-gray-100 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-gray-50 transition-all">
+        <div className="flex flex-col gap-0.5">
+          <p className="font-bold text-[#171717]">{event.name}</p>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-xs">{typeLabel[event.type]}</span>
+            <span className="text-gray-300 text-xs">·</span>
+            <span className="text-gray-400 text-xs">{event.date}</span>
+            {event.avg_rating !== null && (
+              <>
+                <span className="text-gray-300 text-xs">·</span>
+                <span className="text-yellow-500 text-xs font-semibold">
+                   {Number(event.avg_rating).toFixed(1)} ({event.review_count})
+                </span>
+                </>
             )}
+          </div>
         </div>
-    )
+        <span className="text-gray-400 text-xs">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 flex flex-col gap-3 border-t border-gray-100 pt-3">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Téma</p>
+              <p className="text-[#171717]">{event.topic}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Célcsoport</p>
+              <p className="text-[#171717]">{event.target_audience}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Helyszín</p>
+              <p className="text-[#171717]">{event.location}</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Max férőhely</p>
+              <p className="text-[#171717]">{event.max_capacity} fő</p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Főszervező</p>
+              <p className="text-[#171717]">
+                {event.main_organizer_name
+                  ? `${event.main_organizer_name} (${event.main_organiser_class_number}.${event.main_organiser_class_letter})`
+                  : '—'}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Átlag értékelés</p>
+              <p className="text-[#171717] font-semibold">
+                {event.avg_rating !== null
+                  ? `★ ${Number(event.avg_rating).toFixed(1)} / 5 (${event.review_count} értékelés)`
+                  : '—'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 // ============================================================
@@ -720,7 +635,7 @@ export default function AdminDashboard() {
                     ) : (
                         <div className="flex flex-col gap-3">
                             {archivedEvents.map(e => (
-                                <ArchivKartya key={e.id} event={e} onSaved={fetchArchivedEvents} />
+                                <ArchivKartya key={e.id} event={e} />
                             ))}
                         </div>
                     )}

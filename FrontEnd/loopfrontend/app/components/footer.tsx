@@ -9,11 +9,12 @@ export default function footer(){
 
         <footer style={{borderTop:'1px white solid'}} className=" w-full bg-[#6034e3] text-center py-4">
             <div className="max-w-7xl mx-auto ">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex text-white items-center">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white items-center">
 
                     <div className='mb-3'>
                         <Image className="h-20 w-auto m-auto" src={Logo} alt="" />
                         <p>Boundless© 2026 minden jog fenntartva</p>
+                        <Link className='underline mt-12' href="/disclaimer">Disclaimer!</Link>
                         
                     </div>
                     <div className='mb-3'> 

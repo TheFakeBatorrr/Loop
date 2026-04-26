@@ -33,7 +33,7 @@ class EventController extends Controller
         $query = Event::query()
             ->leftJoin('ido_events', 'events.id', '=', 'ido_events.ido_event_id')
             ->leftJoin('reviews', 'events.id', '=', 'reviews.reviews_event_id')
-            ->leftJoin('students', 'ido_events.main_organizer_id', '=', 'students.users_id')
+            ->leftJoin('students', 'ido_events.main_organiser_id', '=', 'students.users_id')
             ->where('events.status', 'ended');
 
         if ($role === 'Admin') {
@@ -48,8 +48,8 @@ class EventController extends Controller
                     events.max_capacity,
                     events.target_audience,
                     students.name as main_organizer_name,
-                    students.class_number as main_organizer_class_number,
-                    students.class_letter as main_organizer_class_letter,
+                    students.class_number as main_organiser_class_number,
+                    students.class_letter as main_organiser_class_letter,
                     AVG(reviews.review) as avg_rating,
                     COUNT(reviews.id) as review_count
                 ')
@@ -77,8 +77,8 @@ class EventController extends Controller
                     ido_events.expanses,
                     ido_events.main_organizer_id,
                     students.name as main_organizer_name,
-                    students.class_number as main_organizer_class_number,
-                    students.class_letter as main_organizer_class_letter,
+                    students.class_number as main_organiser_class_number,
+                    students.class_letter as main_organiser_class_letter,
                     AVG(reviews.review) as avg_rating,
                     COUNT(reviews.id) as review_count
                 ')
@@ -102,7 +102,7 @@ class EventController extends Controller
                     events.date,
                     events.location,
                     events.target_audience,
-                    students.name as main_organizer_name,
+                    students.name as main_organiser_name,
                     AVG(reviews.review) as avg_rating
                 ')
                 ->groupBy(

@@ -26,7 +26,7 @@ class StudentController extends Controller
             "users_id" => "required|exists:users,id",
             "name" => "required|string|max:120",
             "class_number" => "required|integer|max:13",
-            "class_letter" => "required|string|max:5"
+            "class_letter" => "required|string|max:6" 
         ],
         [
             "required" => ":attribute megadása kötelező!",

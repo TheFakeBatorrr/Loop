@@ -9,6 +9,8 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+
 
 // AUTH (nem védett)
 Route::post('/login', [AuthController::class, 'login']);
@@ -19,6 +21,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // AUTH
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', function (Request $request) {
+        return response()->json($request->user());
+    });
 
     // USERS
     Route::prefix('user')->controller(UserController::class)->group(function () {
