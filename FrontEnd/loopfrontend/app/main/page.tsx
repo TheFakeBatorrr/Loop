@@ -7,14 +7,14 @@ import { useAuth } from '../components/AuthProvider'
 import { useTheme } from '../components/ThemeProvider'
 
 const slides = [
-  { img: '/assets/carousel/placeholdder2.jpg', label: 'Gólyabál 2025' },
+  { img: '/assets/carousel/BoundlessGrapics1.png', label: 'Boundless mától az IDÖ-t is segíti' },
   { img: '/assets/carousel/placeholder.jpg', label: 'Sportsnap 2025' },
 ]
 
-const topics = ['Sport' , 'Kultúra' , 'Tanulmány' , 'Továbbtanulás' , 'Iskolai élet' , 'Szórakozás' , 'Csapatépítés' , 'Egyéb']
+const topics = ['Sport' , 'Kultúra' , 'Tanulmány' , 'Továbbtanulás' , 'Iskolai élet' , 'Szórakozás' , 'Csapatépítés' , 'Egyéb' , 'Minden']
 
 function useInView(threshold = 0.2) {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null)  
   const [inView, setInView] = useState(false)
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -68,7 +68,7 @@ export default function MainPage() {
             key={i}
             className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100' : 'opacity-0'}`}
           >
-            <Image src={slide.img} alt={slide.label} fill className="object-cover" />
+            <Image src={slide.img} alt={slide.label} priority fill className="object-cover" />
             
             {/* Label */}
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2">

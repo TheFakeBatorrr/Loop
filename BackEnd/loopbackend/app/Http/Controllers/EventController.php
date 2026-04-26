@@ -47,7 +47,7 @@ class EventController extends Controller
                     events.location,
                     events.max_capacity,
                     events.target_audience,
-                    students.name as main_organizer_name,
+                    students.name as main_organiser_name,
                     students.class_number as main_organiser_class_number,
                     students.class_letter as main_organiser_class_letter,
                     AVG(reviews.review) as avg_rating,
