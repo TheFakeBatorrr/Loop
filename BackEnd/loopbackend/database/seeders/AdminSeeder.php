@@ -14,6 +14,7 @@ class AdminSeeder extends Seeder
             'username' => 'admin',
             'email'    => 'admin@loop.hu',
             'password' => Hash::make('admin1234'),
+            'email_verified_at' => now(),
             'role'     => 'Admin',
         ]);
     }

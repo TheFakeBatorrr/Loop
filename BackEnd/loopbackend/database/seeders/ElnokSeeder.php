@@ -14,6 +14,7 @@ class ElnokSeeder extends Seeder
             'username' => 'elnok',
             'email' => 'elnok@loop.hu',
             'password' => Hash::make('elnok1234'),
+            'email_verified_at' => now(),
             'role' => 'President'
         ]);
     }
