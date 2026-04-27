@@ -12,6 +12,9 @@ use App\Http\Controllers\UserController;
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
 
 use Illuminate\Auth\Events\Verified;
 use App\Models\User;
@@ -19,6 +22,19 @@ use App\Models\User;
 // AUTH (nem védett)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+
+// Ez fogadja a linkre kattintást és visszaadja a tokent // PASSWORD RESET (nem védett)
+Route::get('/reset-password', function (Request $request) {
+    return response()->json([
+        'token' => $request->token,
+        'email' => $request->email,
+        'message' => 'Használd ezt a tokent a POST /api/reset-password endpointon!'
+    ], 200);
+})->name('password.reset');
+
+// PASSWORD RESET (nem védett)
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 // EMAIL VERIFY (nem védett, csak signed)
 Route::get('/email/verify/{id}/{hash}', function($id, $hash) {
