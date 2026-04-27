@@ -81,6 +81,11 @@ function DashboardContent() {
       )
     }
 
+    if(user.role === 'Graduated')
+      return(
+        <div></div>
+      )
+
     if (application?.accepted === 'Pending') {
       return (
         <div className="bg-[#6034e3] rounded-2xl p-6">
@@ -112,6 +117,7 @@ function DashboardContent() {
           </button>
         </div>
       </div>
+      
     )
   }
 

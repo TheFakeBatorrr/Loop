@@ -29,19 +29,26 @@ export type Event = {
   created_by: number
 }
 
+
 export type ArchivedEvent = {
-  id: number
-  name: string
-  type: EventType
-  topic: string
-  date: string
-  location: string
-  max_capacity: number
-  target_audience: string
-  ido_event_id: number | null
-  revenue: string | null
-  expanses: string | null
-  main_organizer_id: number | null
+  id: number,
+  name: string,
+  type: EventType,
+  topic: string,
+  date: string,
+  location: string,
+  max_capacity: number,
+  target_audience: string,
+  visibility: string,
+  ido_event_id: number,
+  revenue: string | null,
+  expanses: string | null,
+  main_organiser_id: number | null,
+  main_organiser_name: string | null,
+  main_organiser_class_number: number | null,
+  main_organiser_class_letter: string | null,
+  avg_rating: string,
+  review_count: number
 }
 
 export type Member = {

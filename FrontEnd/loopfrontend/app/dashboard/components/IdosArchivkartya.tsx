@@ -11,7 +11,7 @@ type IdosArchivedEvent = {
   date: string
   location: string
   target_audience: string
-  main_organizer_name: string | null
+  main_organiser_name: string | null
   avg_rating: number | null
 }
 
@@ -67,7 +67,7 @@ export default function IdosArchivKartya({ event }: Props) {
             </div>
             <div>
               <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Főszervező</p>
-              <p className="text-white">{event.main_organizer_name ?? '—'}</p>
+              <p className="text-white">{event.main_organiser_name ?? '—'}</p>
             </div>
             <div>
               <p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Értékelés</p>

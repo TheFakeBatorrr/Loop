@@ -26,19 +26,19 @@ type Event = {
 }
 
 
-type ArchivedEvent = {
-    id: number
-    name: string
-    type: EventType
-    topic: string
-    date: string
-    location: string
-    max_capacity: number
-    target_audience: string
-    main_organizer_name: string | null
-    main_organiser_class_number: number | null
-    main_organiser_class_letter: string | null
-    avg_rating: number | null
+export type ArchivedEvent = {
+    id: number,
+    name: string,
+    type: EventType,
+    topic: string,
+    date: string,
+    location: string,
+    max_capacity: number,
+    target_audience: string,
+    main_organiser_name: string | null,
+    main_organiser_class_number: number | null,
+    main_organiser_class_letter: string | null,
+    avg_rating: string,
     review_count: number
 }
 
@@ -254,7 +254,7 @@ function UjEsemenyModal({ onClose, onCreated, userId }: {
 }
 
 // ============================================================
-// ARCHÍV KÁRTYA (admin POV — bevétel/kiadás + avg rating)
+// ARCHÍV KÁRTYA (admin POV + avg rating)
 // ============================================================
 
 function ArchivKartya({ event }: { event: ArchivedEvent }) {
@@ -306,8 +306,8 @@ function ArchivKartya({ event }: { event: ArchivedEvent }) {
             <div>
               <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-0.5">Főszervező</p>
               <p className="text-[#171717]">
-                {event.main_organizer_name
-                  ? `${event.main_organizer_name} (${event.main_organiser_class_number}.${event.main_organiser_class_letter})`
+                {event.main_organiser_name
+                  ? `${event.main_organiser_name} (${event.main_organiser_class_number}.${event.main_organiser_class_letter})`
                   : '—'}
               </p>
             </div>
@@ -355,7 +355,7 @@ export default function AdminDashboard() {
     const [selectedNewPresident, setSelectedNewPresident] = useState<string>('')
     const [presidentTransferLoading, setPresidentTransferLoading] = useState(false)
 
-    // Auth guard — role értéke "Admin" (nagy A)
+    // Auth guard — role értéke "Admin"
     useEffect(() => {
         if (user && user.role !== 'Admin') router.push('/dashboard')
     }, [user])
@@ -407,8 +407,12 @@ export default function AdminDashboard() {
     }
 
     const handleReject = async (id: number) => {
-        // TODO: visszaállítás draft-ra — PATCH /api/esemeny/{id}/reject-status endpoint kész után
-        console.log('reject', id)
+        const response = await authFetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/esemeny/${id}/reject-status`,
+            { method: 'PATCH' }
+        )
+        if (!response.ok) { alert('Hiba történt az elutasítás során!'); return }
+        await fetchEvents()
     }
 
     const handlePresidentTransfer = async () => {
@@ -423,6 +427,16 @@ export default function AdminDashboard() {
         await fetchPresident()
         await fetchMembers()
         setPresidentTransferLoading(false)
+    }
+
+    const handleBump = async () => {
+        if (!confirm('Biztosan futtatod az évfolyam bump-ot? Ez visszafordíthatatlan!')) return
+        const response = await authFetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/student/bump`,
+            { method: 'POST' }
+        )
+        if (!response.ok) { alert('Hiba történt a bump során!'); return }
+        alert('Évfolyam bump sikeresen lefutott!')
     }
 
     if (!user) return null
@@ -595,23 +609,18 @@ export default function AdminDashboard() {
                 {/* Év végi műveletek */}
                 <SectionBox
                     title="Év végi műveletek ⌛"
-                    subtitle="Évfolyam bump és végzős diákok törlése — csak tanév végén futtasd!"
+                    subtitle="Évfolyam bump — csak tanév végén futtasd!"
                 >
                     <div className="flex flex-col gap-4">
                         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
                             <p className="text-yellow-700 text-sm font-semibold">⚠️ Figyelem</p>
-                            <p className="text-yellow-600 text-sm mt-1">Ezek a műveletek visszafordíthatatlanok. Csak tanév végén használd!</p>
+                            <p className="text-yellow-600 text-sm mt-1">Ez a művelet visszafordíthatatlan. Csak tanév végén használd!</p>
                         </div>
-                        <div className="flex gap-3 flex-wrap">
-                            {/* TODO: bekötni — év végi bump endpoint kész után */}
-                            <button className="flex-1 min-w-50 border-2 border-[#6034e3] text-[#6034e3] py-3 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all">
-                                Évfolyam bump (+1 év minden diáknak)
-                            </button>
-                            {/* TODO: bekötni — végzős törlés endpoint kész után */}
-                            <button className="flex-1 min-w-50 border-2 border-red-400 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-400 hover:text-white transition-all">
-                                Végzősök törlése (12-13. évfolyam)
-                            </button>
-                        </div>
+                        <button
+                            onClick={handleBump}
+                            className="border-2 border-[#6034e3] text-[#6034e3] py-3 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all">
+                            Évfolyam bump (+1 év minden diáknak)
+                        </button>
                     </div>
                 </SectionBox>
 

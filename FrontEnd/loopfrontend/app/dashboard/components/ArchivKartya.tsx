@@ -70,6 +70,8 @@ export default function ArchivKartya({ event, onSaved }: Props) {
             <div><p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Célcsoport</p><p className="text-white">{event.target_audience}</p></div>
             <div><p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Helyszín</p><p className="text-white">{event.location}</p></div>
             <div><p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Max férőhely</p><p className="text-white">{event.max_capacity} fő</p></div>
+            <div><p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Főszervező</p><p className="text-white">{event.main_organiser_name} {event.main_organiser_class_number}.{event.main_organiser_class_letter}</p></div>
+            <div><p className="text-white/50 text-xs font-semibold uppercase tracking-wide mb-0.5">Értékelés</p><p className="text-white">{event.avg_rating ?? "-"} ★ ({event.review_count} DB)</p></div>
           </div>
 
           <div className="bg-white/5 rounded-xl p-3">

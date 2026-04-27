@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -75,8 +76,8 @@ class EventController extends Controller
                     ido_events.id as ido_event_id,
                     ido_events.revenue,
                     ido_events.expanses,
-                    ido_events.main_organizer_id,
-                    students.name as main_organizer_name,
+                    ido_events.main_organiser_id,
+                    students.name as main_organiser_name,
                     students.class_number as main_organiser_class_number,
                     students.class_letter as main_organiser_class_letter,
                     AVG(reviews.review) as avg_rating,
@@ -87,7 +88,7 @@ class EventController extends Controller
                     'events.date', 'events.location', 'events.max_capacity',
                     'events.target_audience', 'events.visibility',
                     'ido_events.id', 'ido_events.revenue',
-                    'ido_events.expanses', 'ido_events.main_organizer_id',
+                    'ido_events.expanses', 'ido_events.main_organiser_id',
                     'students.name', 'students.class_number', 'students.class_letter'
                 );
 
@@ -189,6 +190,24 @@ class EventController extends Controller
         ], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
+    public function rejectStatus(string $id)
+    {
+        $event = Event::findOrFail($id);
+
+        if ($event->status !== 'pending_review') {
+            return response()->json([
+                'uzenet' => 'Csak jóváhagyásra váró esemény utasítható vissza!'
+            ], 422, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $event->status = 'draft';
+        $event->save();
+
+        return response()->json([
+            'uzenet' => 'Esemény visszaállítva tervezet állapotba.',
+            'status' => $event->status,
+        ], 200, options: JSON_UNESCAPED_UNICODE);
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -198,7 +217,7 @@ class EventController extends Controller
             "name" => "required|string|max:60",
             "type" => "required|string|max:120",
             "status" => "required|string",
-            "topic" => "required|string|in:Sport,Kultúra,Tanulmány,Továbbtanulás,Iskolai élet,Szórakozás,Csapatépítés,Egyéb",
+            "topic" => "required|string|in:Sport,Kultúra,Tanulmány,Tovább tanulás,Iskolai élet,Szórakozás,Csapatépítés,Egyéb",
             "target_audience" => "required|string|max:20",
             "date" => "required|date",
             "location" => "required|string|max:255",
@@ -220,9 +239,21 @@ class EventController extends Controller
         $event = Event::create($request->all());
 
         if (in_array($event->type, ['ido_only', 'ido_school', 'school_ido'])) {
-            \App\Models\Ido_events::create([
+
+            $idoEventData = [
                 'ido_event_id' => $event->id,
-            ]);
+            ];
+
+            // csak ennél a 2 típusnál kell main organiser
+            if (in_array($event->type, ['ido_only', 'school_ido'])) {
+                $president = User::where('role', 'President')->first();
+
+                if ($president) {
+                    $idoEventData['main_organiser_id'] = $president->id;
+                }
+            }
+
+            \App\Models\Ido_events::create($idoEventData);
         }
 
         return response()->json([

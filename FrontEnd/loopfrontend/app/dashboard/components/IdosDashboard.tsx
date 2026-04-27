@@ -14,7 +14,7 @@ type IdosArchivedEvent = {
   date: string
   location: string
   target_audience: string
-  main_organizer_name: string | null
+  main_organiser_name: string | null
   avg_rating: number | null
 }
 

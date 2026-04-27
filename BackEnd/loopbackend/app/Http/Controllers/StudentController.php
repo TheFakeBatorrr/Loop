@@ -95,4 +95,56 @@ class StudentController extends Controller
     {
         //
     }
+
+    public function bump()
+    {
+        $students = Student::with('user')->get();
+
+        foreach ($students as $student) {
+            $letter = $student->class_letter;
+            $number = $student->class_number;
+
+            // Speciális első évesek — class_letter tartalmaz '/'
+            // pl. E/nyk → E, T/ajtp → T, marad 9-es évfolyamon
+            if (str_contains($letter, '/')) {
+                $student->class_letter = explode('/', $letter)[0];
+                $student->save();
+                continue;
+            }
+
+            // 13.B és 13.C → Graduated
+            if ($number === 13 && in_array($letter, ['B', 'C'])) {
+                $student->class_number = null;
+                $student->class_letter = null;
+                $student->save();
+
+                if ($student->user) {
+                    $student->user->role = 'Graduated';
+                    $student->user->save();
+                }
+                continue;
+            }
+
+            // 12-es mindenki más → Graduated
+            if ($number === 12) {
+                $student->class_number = null;
+                $student->class_letter = null;
+                $student->save();
+
+                if ($student->user) {
+                    $student->user->role = 'Graduated';
+                    $student->user->save();
+                }
+                continue;
+            }
+
+            // Minden más → class_number + 1
+            $student->class_number = $number + 1;
+            $student->save();
+        }
+
+        return response()->json([
+            'uzenet' => 'Évfolyam bump sikeresen lefutott!'
+        ], 200, options: JSON_UNESCAPED_UNICODE);
+    }
 }

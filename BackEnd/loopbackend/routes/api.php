@@ -115,6 +115,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', 'store');
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
+        Route::post('/bump', 'bump');
     });
 
     // STAFF
