@@ -308,7 +308,7 @@ export default function Login() {
                     <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-3">
                         <div className="flex justify-between items-center border-b border-gray-100 pb-3">
                             <span className="text-gray-500 text-sm font-semibold">Osztály</span>
-                            <span className="font-bold text-[#171717]">{profileData?.osztaly ?? '-'}</span>
+                            <span className="font-bold text-[#171717]">{user?.role === "Graduated" ? 'Elballagott' : profileData?.osztaly}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-gray-500 text-sm font-semibold">Leadott értékelések</span>
