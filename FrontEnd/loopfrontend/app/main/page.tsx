@@ -40,7 +40,7 @@ interface StudentProfile {
 
 const slides = [
   { img: '/assets/carousel/BoundlessGrapics1.png', label: 'A Boundless mától az IDÖ-t is segíti' },
-  { img: '/assets/carousel/placeholder.jpg', label: 'Sport nap 2026' },
+  { img: '/assets/carousel/suli.jpg', label: 'Sport nap 2026' },
 ]
 
 const topics = [
@@ -356,7 +356,7 @@ export default function MainPage() {
       )}
 
       {/* ARCHÍVUM */}
-      {user && (
+      {user ?  (
         <div className="max-w-4xl mx-auto px-6 py-10 opacity-80">
           <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} rounded-3xl p-8 border`}>
             <h2 className="text-2xl font-bold mb-6 text-[#6034e3]">Lezárt események</h2>
@@ -368,7 +368,28 @@ export default function MainPage() {
             />
           </div>
         </div>
+      ) : (
+        <div className="max-w-4xl mx-auto px-6 py-20 text-center">
+          <div className="bg-[#6034e3] rounded-3xl p-12 shadow-2xl shadow-[#6034e3]/20 transition-all hover:scale-[1.01]">
+            <h2 className="text-3xl font-bold text-white mb-4">Úgy néz ki nem vagy bejelentkezve</h2>
+            <p className="text-purple-100 mb-8 text-lg max-w-md mx-auto">
+              Jelentkezz be, hogy lásd az eseményeket!
+            </p>
+            
+            <Link 
+              href="/login" 
+              className="inline-block bg-white text-[#6034e3] font-bold px-8 py-4 rounded-2xl hover:bg-gray-100 transition-colors text-lg shadow-lg"
+            >
+              Bejelentkezés most
+            </Link>
+            
+            <p className="mt-6 text-purple-200 text-sm">
+              Még nincs fiókod? <Link href="/login" className="underline font-semibold hover:text-white">Regisztrálj itt</Link>
+            </p>
+          </div>
+        </div>
       )}
+
     </main>
   )
 }
