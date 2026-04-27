@@ -142,6 +142,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::put('/{id}', 'update');
         Route::get('/event/{event_id}', 'byEvent');
         Route::get('/user/{user_id}/event/{event_id}', 'byUserAndEvent');
+        Route::get('/ido-profil/{user_id}','idoProfil');
     });
 
 });

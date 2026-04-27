@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StaffController extends Controller
 {
@@ -59,9 +61,23 @@ class StaffController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function idoProfil(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        $data = DB::table('staff')
+            ->join('events', 'staff.staff_event_id', '=', 'events.id')
+            ->where('staff.staff_user_id', $id)
+            ->where('staff.accepted', 1)
+            ->select(
+                'events.id',
+                'events.name',
+                'events.date',
+                'staff.role as user_event_role'
+            )
+            ->get();
+
+        return response()->json($data,200,[],JSON_UNESCAPED_UNICODE);
     }
 
     /**

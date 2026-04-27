@@ -23,6 +23,9 @@ export default function Login() {
     const [fullName, setFullName] = useState("")
     const [osztaly, setOsztaly] = useState("")
 
+    const [idoEvents, setIdoEvents] = useState<any[]>([])
+    const [idoProfileOpen, setIdoProfileOpen] = useState(false)
+
     const canLogin = email !== "" && password !== ""
     const canRegister = email !== "" && password !== "" && username !== "" && password_confirmation !== ""
 
@@ -35,6 +38,25 @@ export default function Login() {
             setView('profile')
             const saved = localStorage.getItem('userProfile')
             if (saved) setProfileData(JSON.parse(saved))
+        }
+    }, [user])
+
+    useEffect(() => {
+        if (!user) return
+
+        const fetchIdoEvents = async () => {
+            const response = await authFetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/staff/ido-profil/${user.id}`
+            )
+
+            if (!response.ok) return
+
+            const data = await response.json()
+            setIdoEvents(data)
+        }
+
+        if (user.role === 'Idos' || user.role === 'President' || user.role === "Graduate") {
+            fetchIdoEvents()
         }
     }, [user])
 
@@ -305,36 +327,70 @@ export default function Login() {
                     <h1 className="text-3xl font-black text-center text-white">
                         Szia, {profileData?.fullName ?? 'Ismeretlen'}!
                     </h1>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                            <span className="text-gray-500 text-sm font-semibold">Osztály</span>
-                            <span className="font-bold text-[#171717]">{user?.role === "Graduated" ? 'Elballagott' : profileData?.osztaly}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-500 text-sm font-semibold">Leadott értékelések</span>
-                            {/* TODO: bekötni — GET /api/ertekeles/{userId} után */}
-                            <span className="font-bold text-[#171717]">—</span>
-                        </div>
-                    </div>
-                    <div className="bg-[#111111] rounded-2xl p-6 flex flex-col gap-3">
-                        <p className="text-white font-black text-lg mb-1">IDÖ profil</p>
-                        <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                            <span className="text-white/60 text-sm font-semibold">Staff részvételek</span>
-                            {/* TODO: bekötni — staff részvétel lekérés után */}
-                            <span className="font-bold text-white">—</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-white/60 text-sm font-semibold">IDÖ-s évek</span>
-                            {/* TODO: bekötni — IDÖ-s évek számítás után */}
-                            <span className="font-bold text-white">—</span>
-                        </div>
-                    </div>
+
                     <button
                         onClick={() => router.push('/dashboard?tab=reviews')}
                         className="bg-white text-[#6034e3] font-bold py-3 rounded-xl hover:bg-white/80 transition-all duration-300"
                     >
                         Értékeléseim
                     </button>
+
+                    {(user?.role === 'Idos' || user?.role === 'President' || user?.role === "Graduate") && (
+                        <div className="bg-[#111111] rounded-2xl p-6 flex flex-col gap-3">
+                            <button
+                                onClick={() => setIdoProfileOpen(!idoProfileOpen)}
+                                className="flex items-center justify-between text-left"
+                            >
+                                <div>
+                                    <p className="text-white font-black text-lg">
+                                        IDÖ profil
+                                    </p>
+
+                                    <p className="text-white/70 text-sm mt-1">
+                                        {user?.role === 'President'
+                                            ? 'IDÖ elnök 👑'
+                                            : user?.role === 'Idos'
+                                            ? 'IDÖ tag'
+                                            : user?.role}
+                                    </p>
+                                </div>
+
+                                <span className="text-white text-xl">
+                                    {idoProfileOpen ? '−' : '+'}
+                                </span>
+                            </button>
+
+                            {idoProfileOpen && (
+                                <div className="flex flex-col gap-3 pt-2">
+                                    {idoEvents.length > 0 ? (
+                                        idoEvents.map((event) => (
+                                            <div
+                                                key={event.id}
+                                                className="border border-white/10 rounded-xl p-4"
+                                            >
+                                                <p className="text-white font-semibold">
+                                                    {event.name}
+                                                </p>
+
+                                                <p className="text-white/60 text-sm mt-1">
+                                                    {event.date}
+                                                </p>
+
+                                                <p className="text-white/80 text-sm mt-2">
+                                                    {event.user_event_role}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-white/60 text-sm">
+                                            Nincs még kapcsolódó esemény.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <button
                         onClick={handleLogout}
                         className="border-2 border-red-400 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-400 hover:text-white transition-all duration-300"
@@ -343,6 +399,6 @@ export default function Login() {
                     </button>
                 </div>
             )}
-        </main>
+                    </main>
     )
 }
