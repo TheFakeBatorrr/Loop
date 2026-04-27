@@ -89,7 +89,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('/', 'store');
         Route::delete('/{id}', 'destroy');
         Route::put('/{id}', 'update');
-        Route::get('/myreviews' , 'getMyReviews');
+        Route::get('/myreviews/{id}' , 'getMyReviews');
     });
 
     // ESEMÉNYEK
@@ -103,6 +103,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::get('/elnok', 'elnokEvents');
         Route::get('/archivum' , 'archivum');
         Route::get('/userarchivum', 'userArchivum');
+        Route::get('/published' , 'published');
+        Route::get('/canrate' , 'canRate');
     });
 
     // IDÖ ESEMÉNYEK

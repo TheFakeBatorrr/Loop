@@ -185,7 +185,7 @@ function UjEsemenyModal({ onClose, onCreated, userId }: {
                             <option value="Kultúra">Kultúra</option>
                             <option value="Ismeretterjesztő">Ismeretterjesztő</option>
                             <option value="Tanulmány">Tanulmány</option>
-                            <option value="Tovább tanulás">Tovább tanulás</option>
+                            <option value="Tovább tanulás">Továbbtanulás</option>
                             <option value="Iskolai élet">Iskolai élet</option>
                             <option value="Szórakozás">Szórakozás</option>
                             <option value="Csapatépítés">Csapatépítés</option>

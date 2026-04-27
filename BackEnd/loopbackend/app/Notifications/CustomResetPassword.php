@@ -21,7 +21,11 @@ class CustomResetPassword extends Notification
 
     public function toMail($notifiable): MailMessage
     {
-        $url = url('/api/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email));
+        // Az env-ből olvassa ki, ha nincs ott, akkor marad a localhost:3000
+        $frontend = config('app.frontend_url') ?? env('FRONTEND_URL', 'http://localhost:3000');
+
+        // Itt volt egy plusz ')' a végén, azt kivettem:
+        $url = $frontend . '/reset-password?token=' . $this->token . '&email=' . urlencode($notifiable->email);
 
         return (new MailMessage)
             ->subject('Jelszó visszaállítás')

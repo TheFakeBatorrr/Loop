@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 use function Laravel\Prompts\select;
 
@@ -19,22 +21,6 @@ class ReviewController extends Controller
         return response()->json($Review, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
-    private function getTrack(string $letter): string
-    {
-        return match(strtoupper($letter)) {
-            'A'     => 'real',
-            'B'     => 'info_tech',
-            'C', 'G'=> 'gazd_tech',
-            'D', 'F'=> 'real',
-            'E'     => 'kettannyelvu',
-            'H'     => 'human',
-            'I'     => 'info_tech',
-            default => 'unknown',
-        };
-
-        //$track = $this->getTrack($student->class_letter); <- helper method hívás
-    }
-
     public function getMyReviews($id)
     {
         $myReviwes = Review::query()
@@ -45,7 +31,7 @@ class ReviewController extends Controller
             'events.name',
             'events.topic',
             'events.date',
-            'reviews.reqview',
+            'reviews.review',
             'reviews.content',
         )->get();
 
@@ -58,12 +44,20 @@ class ReviewController extends Controller
      */
     public function store(Request $request)
     {
+        $user_id = $request->user()->id;
+
         $request->validate([
-            "reviews_events_id" => "required|exists:events,id",
-            "reviews_users_id" => "required|exists:users,id",
+            "reviews_event_id" => [
+                "required",
+                "exists:events,id",
+                // Itt a mágia: csak akkor érvényes, ha a reviews táblában 
+                // az adott reviews_event_id-hoz még nincs párosítva ez a user_id
+                Rule::unique('reviews')->where(function ($query) use ($user_id) {
+                    return $query->where('reviews_user_id', $user_id);
+                }),
+            ],
             "review" => "required|integer|max:5|min:1",
             "content" => "required|string|max:255",
-            "date" => "required|date",
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -75,7 +69,13 @@ class ReviewController extends Controller
             "date" => ":attribute csak dátum lehet!",
         ]); 
 
-        $data = Review::create($request->all());
+        $data = Review::create([
+            'reviews_event_id' => $request->reviews_event_id,
+            'reviews_user_id' => $user_id,
+            'review' => $request->review,
+            'content' => $request->content,
+            'date' => now()
+        ]);
 
         return response()->json([
             "uzenet"=> "Sikeres értékelés!",

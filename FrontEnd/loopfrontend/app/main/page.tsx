@@ -5,146 +5,370 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '../components/AuthProvider'
 import { useTheme } from '../components/ThemeProvider'
+import {
+  FaLocationDot,
+  FaCalendarDays,
+  FaStar,
+  FaStarHalfStroke,
+  FaRegStar,
+  FaChevronDown,
+  FaChevronUp,
+} from 'react-icons/fa6'
+import { userAgent } from 'next/server'
+import { profile } from 'console'
 
-const slides = [
-  { img: '/assets/carousel/BoundlessGrapics1.png', label: 'Boundless mától az IDÖ-t is segíti' },
-  { img: '/assets/carousel/placeholder.jpg', label: 'Sportsnap 2025' },
-]
+// ─── Types ───────────────────────────────────────────────────────────────────
 
-const topics = ['Sport' , 'Kultúra' , 'Tanulmány' , 'Továbbtanulás' , 'Iskolai élet' , 'Szórakozás' , 'Csapatépítés' , 'Egyéb' , 'Minden']
-
-function useInView(threshold = 0.2) {
-  const ref = useRef<HTMLDivElement>(null)  
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setInView(true)
-    }, { threshold })
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-  return { ref, inView }
+interface ArchivedEvent {
+  id: number
+  name: string
+  topic: string
+  date: string
+  location: string
+  target_audience: string
+  avg_rating: number | null
 }
 
-function AnimatedSection({ children, className = '' }: { children: React.ReactNode, className?: string }) {
-  const { ref, inView } = useInView()
+interface StudentProfile {
+  users_id: number
+  name: string
+  class_number: number
+  class_letter: string
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const slides = [
+  { img: '/assets/carousel/BoundlessGrapics1.png', label: 'A Boundless mától az IDÖ-t is segíti' },
+  { img: '/assets/carousel/placeholder.jpg', label: 'Sport nap 2026' },
+]
+
+const topics = [
+  'Sport', 'Kultúra', 'Tanulmány', 'Továbbtanulás',
+  'Iskolai élet', 'Szórakozás', 'Csapatépítés', 'Egyéb', 'Minden',
+]
+
+const topicColors: Record<string, string> = {
+  Sport:          'bg-green-500/20 text-green-400',
+  Kultúra:        'bg-pink-500/20 text-pink-400',
+  Tanulmány:      'bg-blue-500/20 text-blue-400',
+  Továbbtanulás: 'bg-yellow-500/20 text-yellow-400',
+  'Iskolai élet': 'bg-orange-500/20 text-orange-400',
+  Szórakozás:     'bg-purple-500/20 text-purple-400',
+  Csapatépítés:   'bg-teal-500/20 text-teal-400',
+  Egyéb:          'bg-gray-500/20 text-gray-400',
+}
+
+// ─── Components ──────────────────────────────────────────────────────────────
+
+function StarRating({ value }: { value: number | null }) {
+  if (value === null) return <span className="text-sm text-gray-400 italic">Nincs értékelés</span>
+  const numericValue = Number(value)
+  const stars = []
+  const roundedValue = Math.round(value * 2) / 2
+  for (let i = 1; i <= 5; i++) {
+    if (roundedValue >= i) stars.push(<FaStar key={i} className="text-yellow-400" />)
+    else if (roundedValue >= i - 0.5) stars.push(<FaStarHalfStroke key={i} className="text-yellow-400" />)
+    else stars.push(<FaRegStar key={i} className="text-yellow-400/40" />)
+  }
+  return <div className="flex items-center gap-1">{stars}<span className="text-sm text-gray-400 ml-1">{value}</span></div>
+}
+
+function EventCard({ event, theme, showRating = true, canRate = false }: { 
+  event: ArchivedEvent; 
+  theme: string; 
+  showRating?: boolean;
+  canRate?: boolean;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [rating, setRating] = useState(0)
+  const [comment, setComment] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const { authFetch } = useAuth()
+
+  const isDark = theme === 'dark'
+  const badgeClass = topicColors[event.topic] ?? 'bg-gray-500/20 text-gray-400'
+
+  const handleSubmit = async () => {
+    if (rating === 0) return alert("Kérlek, válassz egy csillagot!")
+    setSubmitting(true)
+    try {
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ertekeles`, {
+        method: 'POST',
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+          reviews_event_id: event.id,
+          review: rating,
+          content: comment,
+        })
+      })
+      if (res.ok) {
+        alert("Köszönjük az értékelést!")
+        setIsExpanded(false)
+        setRating(0)
+        setComment('')
+      }
+    } catch (err) {
+      console.error("Rating submission error:", err)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
-    <div ref={ref} className={`transition-all duration-700 ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} ${className}`}>
-      {children}
+    <div className={`rounded-2xl p-5 border flex flex-col gap-3 transition-all duration-500 ${
+      isExpanded ? 'ring-2 ring-[#6034e3] scale-[1.02] z-20' : 'hover:-translate-y-1'
+    } ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-md'}`}>
+      
+      <span className={`text-xs font-bold px-3 py-1 rounded-full w-fit ${badgeClass}`}>{event.topic}</span>
+      <h3 className={`font-bold text-base leading-tight ${isDark ? 'text-white' : 'text-[#171717]'}`}>{event.name}</h3>
+      
+      <div className={`flex flex-col gap-1.5 text-sm ${isDark ? 'text-white/50' : 'text-gray-500'}`}>
+        <span className="flex items-center gap-2"><FaCalendarDays /> {new Date(event.date).toLocaleDateString('hu-HU')}</span>
+        <span className="flex items-center gap-2"><FaLocationDot /> {event.location}</span>
+      </div>
+
+      {showRating && !isExpanded && (
+        <div className="mt-auto pt-2 border-t border-white/10">
+          <StarRating value={event.avg_rating} />
+        </div>
+      )}
+
+      {canRate && !isExpanded && (
+        <button 
+          onClick={() => setIsExpanded(true)}
+          className="mt-2 w-full py-2 bg-[#6034e3]/10 text-[#6034e3] rounded-lg font-bold hover:bg-[#6034e3] hover:text-white transition-all"
+        >
+          Értékelem
+        </button>
+      )}
+
+      {/* Értékelő Panel */}
+      <div className={`overflow-hidden transition-all duration-500 ${isExpanded ? 'max-h-100 opacity-100 mt-4 pt-4 border-t border-white/10' : 'max-h-0 opacity-0'}`}>
+        <p className="text-sm font-semibold mb-2">Hány csillagot adnál?</p>
+        <div className="flex gap-2 mb-4">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button key={star} onClick={() => setRating(star)} type="button">
+              <FaStar className={`text-2xl transition-colors ${rating >= star ? 'text-yellow-400' : 'text-gray-600'}`} />
+            </button>
+          ))}
+        </div>
+        <textarea 
+          placeholder="Írj egy rövid véleményt..."
+          className={`w-full p-3 rounded-xl text-sm outline-none border transition-all ${isDark ? 'bg-white/5 border-white/10 focus:border-[#6034e3]' : 'bg-gray-50 border-gray-200 focus:border-[#6034e3]'}`}
+          rows={3}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        <div className="flex gap-2 mt-4">
+          <button 
+            disabled={submitting}
+            onClick={handleSubmit}
+            className="flex-1 bg-[#6034e3] text-white py-2 rounded-xl font-bold hover:bg-[#4d29b8] transition-all disabled:opacity-50"
+          >
+            {submitting ? 'Küldés...' : 'Mentés'}
+          </button>
+          <button 
+            onClick={() => setIsExpanded(false)}
+            className={`px-4 py-2 rounded-xl font-semibold ${isDark ? 'bg-white/10 text-white' : 'bg-gray-200 text-gray-700'}`}
+          >
+            Mégse
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
 
+function EventGrid({ events, theme, loading, emptyMsg, showRating = true, canRate = false }: { 
+  events: ArchivedEvent[]; 
+  theme: string; 
+  loading: boolean; 
+  emptyMsg: string; 
+  showRating?: boolean;
+  canRate?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const isDark = theme === 'dark'
+  const visible = expanded ? events : events.slice(0, 3)
+
+  if (loading) return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {[...Array(3)].map((_, i) => <div key={i} className={`rounded-2xl h-44 animate-pulse ${isDark ? 'bg-white/5' : 'bg-gray-100'}`} />)}
+    </div>
+  )
+  if (!events.length) return <p className={`text-sm italic ${isDark ? 'text-white/40' : 'text-gray-400'}`}>{emptyMsg}</p>
+
+  return (
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {visible.map(event => <EventCard key={event.id} event={event} theme={theme} showRating={showRating} canRate={canRate} />)}
+      </div>
+      {events.length > 3 && (
+        <div className="flex justify-center mt-5">
+          <button onClick={() => setExpanded(!expanded)} className={`flex items-center gap-2 px-5 py-2 rounded-full border-2 font-semibold text-sm transition-all duration-300 ${isDark ? 'border-white/20 text-white/60 hover:border-[#6034e3]' : 'border-gray-200 text-gray-500 hover:border-[#6034e3]'}`}>
+            {expanded ? <><FaChevronUp /> Kevesebb</> : <><FaChevronDown /> Több ({events.length - 3})</>}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Main Page ───────────────────────────────────────────────────────────────
+
 export default function MainPage() {
   const [current, setCurrent] = useState(0)
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
-  const { user } = useAuth()
+  const { user, authFetch } = useAuth()
   const { theme } = useTheme()
 
+  const [publishedEvents, setPublishedEvents] = useState<ArchivedEvent[]>([])
+  const [allEvents, setAllEvents] = useState<ArchivedEvent[]>([])
+  const [ratableEvents, setRatableEvents] = useState<ArchivedEvent[]>([])
+  const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(null)
+  
+  const [eventsLoading, setEventsLoading] = useState(false)
+  const [searchLoading, setSearchLoading] = useState(false)
+
+  const isGraduated = user?.role === 'Graduated'
+
+
+  // Profil + Archívum + Értékelhető eventek betöltése
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent(prev => (prev + 1) % slides.length)
-    }, 7000)
+    if (!user) return
+    const fetchData = async () => {
+      setEventsLoading(true)
+      try {
+        const [eventsRes, ratableRes] = await Promise.all([
+          authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/esemeny/userarchivum`),
+          authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/esemeny/canrate`),
+        ])
+        if (eventsRes.ok) setAllEvents(await eventsRes.json())
+        if (ratableRes.ok) setRatableEvents(await ratableRes.json())
+      } catch (err) {
+        console.error('Fetch error:', err)
+      } finally {
+        setEventsLoading(false)
+      }
+    }
+    fetchData()
+  }, [user, authFetch])
+
+  // GET szűrés a topic változásakor
+  useEffect(() => {
+    if (!user) return
+    const handleSearch = async () => {
+      setSearchLoading(true)
+      try {
+        let url = `${process.env.NEXT_PUBLIC_API_URL}/api/esemeny/published`
+        if (selectedTopic && selectedTopic !== 'Minden') {
+          url += `?topic=${encodeURIComponent(selectedTopic)}`
+        }
+        const res = await authFetch(url)
+        if (res.ok) setPublishedEvents(await res.json())
+      } catch (err) {
+        console.error("Search failed:", err)
+      } finally {
+        setSearchLoading(false)
+      }
+    }
+    handleSearch()
+  }, [selectedTopic, user, authFetch])
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrent(prev => (prev + 1) % slides.length), 7000)
     return () => clearInterval(timer)
   }, [])
 
+  const isDark = theme === 'dark'
+
   return (
-    <main className={`${theme === 'dark' ? 'bg-[#0a0a0a] text-white' : 'bg-[#fafafa] text-[#171717]'} transition-colors duration-300`}>
-
-      {/* HERO FELIRAT */}
-      <AnimatedSection>
-        <div className="pt-6 mb-24 text-center relative z-10">
-          <div className="bg-[#6034e3] max-w-5xl mx-auto rounded-2xl py-8 mb-15">
-            <h1 className="text-7xl md:text-8xl font-black text-white tracking-tight">Boundless</h1>
-            <p className="text-white/70 text-lg mt-2">A diákok rendszere</p>
-          </div>
+    <main className={`${isDark ? 'bg-[#0a0a0a] text-white' : 'bg-[#fafafa] text-[#171717]'} transition-colors duration-300 pb-20`}>
+      
+      {/* HERO & CAROUSEL */}
+      <div className="pt-6 mb-12 text-center px-4">
+        <div className="bg-[#6034e3] max-w-5xl mx-auto rounded-3xl py-10 shadow-2xl mb-12">
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter">Boundless</h1>
+          <p className="text-white/60 text-lg uppercase tracking-widest mt-2">The Student Hub</p>
         </div>
-      </AnimatedSection>
 
-      {/* CAROUSEL */}
-      <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden h-150 relative">
-        {slides.map((slide, i) => (
-          <div
-            key={i}
-            className={`absolute inset-0 transition-opacity duration-700 ${i === current ? 'opacity-100' : 'opacity-0'}`}
-          >
-            <Image src={slide.img} alt={slide.label} priority fill className="object-cover" />
-            
-            {/* Label */}
-            <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
-              <div className="bg-[#6034e3] px-6 py-2 rounded-xl">
-                <p className="text-white font-semibold text-lg">{slide.label}</p>
-              </div>
+        <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden h-64 md:h-110 relative shadow-2xl border border-white/5">
+          {slides.map((slide, i) => (
+            <div key={i} className={`absolute inset-0 transition-opacity duration-1000 ${i === current ? 'opacity-100' : 'opacity-0'}`}>
+              <Image src={slide.img} alt={slide.label} fill loading="eager" className="object-cover" />
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-[#6034e3] px-6 py-2 rounded-xl text-white font-bold shadow-lg">{slide.label}</div>
             </div>
-          </div>
-        ))}
-
-        {/* Nyilak */}
-        <button
-          onClick={() => setCurrent(prev => (prev - 1 + slides.length) % slides.length)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-3xl bg-black/30 px-3 py-1 rounded-full hover:bg-black/50 transition-all"
-        >‹</button>
-        <button
-          onClick={() => setCurrent(prev => (prev + 1) % slides.length)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl bg-black/30 px-3 py-1 rounded-full hover:bg-black/50 transition-all"
-        >›</button>
-
-        {/* Pontok */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {slides.map((_, i) => (
-            <button key={i} onClick={() => setCurrent(i)}
-              className={`w-3 h-3 rounded-full transition-all ${i === current ? 'bg-white' : 'bg-white/50'}`}
-            />
           ))}
         </div>
       </div>
 
-      {/* KERESŐ / SZŰRŐ  4!!!!44!!! KEll még a event archivum*/}
-      <AnimatedSection>
-        <div className="max-w-4xl mx-auto px-6 py-16">
-          {user ? (
-            <div className={`${theme === 'dark' ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} rounded-2xl p-8 shadow-lg border transition-colors duration-300`}>
-              <h2 className="text-2xl font-bold mb-6 text-[#6034e3]">Események szűrése</h2>
-              <div className="flex flex-wrap gap-3 mb-6">
-                {topics.map(topic => (
-                  <button
-                    key={topic}
-                    onClick={() => setSelectedTopic(selectedTopic === topic ? null : topic)}
-                    className={`px-4 py-2 rounded-full border-2 font-semibold transition-all duration-300
-                      ${selectedTopic === topic
-                        ? 'bg-[#6034e3] border-[#6034e3] text-white'
-                        : 'border-[#6034e3] text-[#6034e3] hover:bg-[#6034e3] hover:text-white hover:rounded-lg'
-                      }`}
-                  >
-                    {topic}
-                  </button>
-                ))}
-              </div>
-              <button className="bg-[#6034e3] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#8643eb] transition-colors duration-300">
-                Keresés
-              </button>
-              {selectedTopic && (
-                <p className={`mt-6 ${theme === 'dark' ? 'text-white/60' : 'text-gray-400'}`}>
-                  Szűrés: <span className="text-[#6034e3] font-semibold">{selectedTopic}</span>
-                </p>
-              )}
+      {/* KERESÉS / PUBLISHED */}
+      <div className="max-w-4xl mx-auto px-6 py-10">
+        {user && (
+          <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} rounded-3xl p-8 shadow-xl border`}>
+            <h2 className="text-2xl font-bold mb-6 text-[#6034e3]">Események felfedezése</h2>
+            <div className="flex flex-wrap gap-2 mb-8">
+              {topics.map(topic => (
+                <button 
+                  key={topic} 
+                  onClick={() => setSelectedTopic(topic)} 
+                  className={`px-5 py-2 rounded-full border-2 font-bold transition-all duration-300 ${
+                    selectedTopic === topic ? 'bg-[#6034e3] border-[#6034e3] text-white' : 'border-[#6034e3]/30 text-[#6034e3] hover:bg-[#6034e3]/10'
+                  }`}
+                >
+                  {topic}
+                </button>
+              ))}
             </div>
-          ) : (
-            <div className="bg-[#6034e3] rounded-2xl p-10 text-center">
-              <p className="text-white text-xl font-semibold mb-6">
-                Jelentkezz be az események szűréséhez!
-              </p>
-              <Link
-                href="/login"
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-[#6034e3] hover:rounded-[21px] transition-all duration-500 inline-block"
-              >
-                Bejelentkezés
-              </Link>
+            <div className="min-h-50">
+              <h3 className="text-lg font-bold mb-4 opacity-50 uppercase tracking-tight">Aktuális találatok</h3>
+              <EventGrid 
+                events={publishedEvents} 
+                theme={theme} 
+                loading={searchLoading} 
+                emptyMsg="Nincs aktív esemény ebben a kategóriában." 
+                showRating={false} 
+              />
             </div>
-          )}
-        </div>
-      </AnimatedSection>
+          </div>
+        )}
+      </div>
 
+      {/* ÉRTÉKELÉS */}
+      {user && !isGraduated && (
+        <div className="max-w-4xl mx-auto px-6 py-10">
+          <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200 shadow-xl'} rounded-3xl p-8 border`}>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-[#6034e3]">Értékelhető</h2>
+            </div>
+            <EventGrid 
+              events={ratableEvents} 
+              theme={theme} 
+              loading={eventsLoading} 
+              emptyMsg="Jelenleg nincs új értékelhető eseményed." 
+              canRate={true} 
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ARCHÍVUM */}
+      {user && (
+        <div className="max-w-4xl mx-auto px-6 py-10 opacity-80">
+          <div className={`${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-gray-200'} rounded-3xl p-8 border`}>
+            <h2 className="text-2xl font-bold mb-6 text-[#6034e3]">Lezárt események</h2>
+            <EventGrid 
+              events={allEvents} 
+              theme={theme} 
+              loading={eventsLoading} 
+              emptyMsg="Az archívum még üres." 
+            />
+          </div>
+        </div>
+      )}
     </main>
   )
 }

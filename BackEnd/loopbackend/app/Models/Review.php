@@ -13,15 +13,15 @@ class Review extends Model
     protected $table = "reviews";
 
     protected $fillable = [
-        "reviews_events_id",
-        "reviews_users_id",
+        "reviews_event_id",
+        "reviews_user_id",
         "review",
         "content",
         "date"
     ];
 
     public function event(){
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'reviews_event_id');
     }
 
     public function diak(){

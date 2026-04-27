@@ -262,6 +262,13 @@ export default function Login() {
                     >
                         Először regisztrálok
                     </button>
+                    <button
+                        onClick={() => {setEmail(''); setPassword(''); setUsername(''); setPassword_confirmation(''); router.push('/forgot-password') }}
+                        style={{ color: "white" }}
+                        className="py-2 rounded-xl border-white border w-fit mx-auto px-3"
+                    >
+                        Elfelejtett jelszó
+                    </button>
                 </div>
             )}
 
@@ -327,6 +334,7 @@ export default function Login() {
                     <h1 className="text-3xl font-black text-center text-white">
                         Szia, {profileData?.fullName ?? 'Ismeretlen'}!
                     </h1>
+                    <p className="font-black text-center text-white">{profileData?.osztaly}</p>
 
                     <button
                         onClick={() => router.push('/dashboard?tab=reviews')}

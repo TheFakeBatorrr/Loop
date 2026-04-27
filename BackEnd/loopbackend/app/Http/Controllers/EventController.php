@@ -12,13 +12,14 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() //használjuk
     {
-        $Event = Event::all();
-        return response()->json($Event, 200, options:JSON_UNESCAPED_UNICODE);
+        $data = Event::all();
+
+        return response()->json($data,200,options:JSON_UNESCAPED_UNICODE);
     }
 
-    public function elnokEvents()
+    public function elnokEvents() //használjuk
     {
         $events = Event::where('type', '!=', 'external')
             ->whereNotIn('status', ['published', 'ended'])
@@ -27,7 +28,7 @@ class EventController extends Controller
         return response()->json($events, 200, options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function archivum(Request $request)
+    public function archivum(Request $request) //használjuk
     {
         $role = $request->user()->role;
 
@@ -113,15 +114,15 @@ class EventController extends Controller
                 );
         }
 
-        return response()->json($query->get(), 200, options: JSON_UNESCAPED_UNICODE);
+        return response()->json($query->orderBy('events.date' , 'desc')->get(), 200, options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function userArchivum(Request $request)
+    public function userArchivum(Request $request) //hasznájuk
     {
         $role = $request->user()->role;
 
         $query = Event::query()
-            ->leftJoin('reviews', 'events.id', '=', 'reviews.reviews_events_id')
+            ->leftJoin('reviews', 'events.id', '=', 'reviews.reviews_event_id')
             ->where('events.status', 'ended')
             ->selectRaw('
                 events.id,
@@ -132,7 +133,7 @@ class EventController extends Controller
                 events.target_audience,
                 AVG(reviews.review) as avg_rating
             ')
-            ->where('event.topic' === $request->topic)
+            ->when($request->topic, fn($q, $topic) => $q->where('events.topic', $topic))
             ->groupBy(
                 'events.id', 'events.name', 'events.topic',
                 'events.date', 'events.location', 'events.target_audience',
@@ -143,10 +144,26 @@ class EventController extends Controller
             $query->where('events.visibility', '=', 'public');
         }
 
-        return response()->json($query->get(), 200, options: JSON_UNESCAPED_UNICODE);
+        return response()->json($query->orderBy('events.date' , 'desc')->get(), 200, options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function nextStatus(string $id)
+    public function published(Request $request) //használjuk
+    {
+        $user = $request->user()->id;
+
+        $query = Event::where('status' , 'published');
+
+        if($request->has('topic') && $request->topic !== 'Minden')
+            {
+                $query->where('topic' , $request->topic);
+            }
+
+        $event = $query->orderBy('date' , 'desc')->get();
+
+        return response()->json($event,200,options:JSON_UNESCAPED_UNICODE);
+    }
+
+    public function nextStatus(string $id) //használjuk
     {
         $event = Event::findOrFail($id);
 
@@ -190,7 +207,7 @@ class EventController extends Controller
         ], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
-    public function rejectStatus(string $id)
+    public function rejectStatus(string $id) //használjuk
     {
         $event = Event::findOrFail($id);
 
@@ -211,13 +228,13 @@ class EventController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request) //használjuk
     {
         $request->validate([
             "name" => "required|string|max:60",
             "type" => "required|string|max:120",
             "status" => "required|string",
-            "topic" => "required|string|in:Sport,Kultúra,Tanulmány,Tovább tanulás,Iskolai élet,Szórakozás,Csapatépítés,Egyéb",
+            "topic" => "required|string|in:Sport,Kultúra,Tanulmány,Továbbtanulás,Iskolai élet,Szórakozás,Csapatépítés,Egyéb",
             "target_audience" => "required|string|max:20",
             "date" => "required|date",
             "location" => "required|string|max:255",
@@ -282,12 +299,71 @@ class EventController extends Controller
      */
     public function destroy(string $id)
     {
-        $Event = Event::find($id);
-
-        $Event->delete();
-
-        return response()->json([
-            "uzenet" => "Sikeres törlés!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+        //
     }
+
+    public function canRate(Request $request)
+    {
+        $user = $request->user();
+        $student = $user->student;
+
+        if (!$student) {
+            return response()->json([], 200, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        $classNumber = $student->class_number;
+        $track = $this->getTrack($student->class_letter);
+
+        $events = Event::query()
+            // avg_rating számításhoz — összes review átlaga
+            ->leftJoin('reviews', 'events.id', '=', 'reviews.reviews_event_id')
+            ->where('events.status', 'ended')
+            // target_audience egyezés
+            ->where(function ($q) use ($classNumber, $track) {
+                $q->where('events.target_audience', 'Minden diák')
+                ->orWhere('events.target_audience', $classNumber . '. évfolyam')
+                ->orWhere('events.target_audience', $track);
+            })
+            // ezt a usert még nem értékelte — külön subquery, nem érinti a join-t
+            ->whereNotExists(function ($q) use ($user) {
+                $q->selectRaw(1)
+                ->from('reviews as r2')
+                ->whereColumn('r2.reviews_event_id', 'events.id')
+                ->where('r2.reviews_user_id', $user->id);
+            })
+            ->selectRaw('
+                events.id,
+                events.name,
+                events.topic,
+                events.date,
+                events.location,
+                events.target_audience,
+                AVG(reviews.review) as avg_rating
+            ')
+            ->groupBy(
+                'events.id',
+                'events.name',
+                'events.topic',
+                'events.date',
+                'events.location',
+                'events.target_audience'
+            )
+            ->orderBy('events.date', 'desc')
+            ->get();
+
+        return response()->json($events, 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    private function getTrack(string $letter): string
+    {
+        return match(strtoupper($letter)) {
+            'A', 'D', 'F' => 'Reál',
+            'B', 'I'      => 'Info tech',
+            'C', 'G'      => 'Gazd tech',
+            'E'           => 'Kéttannyelvű',
+            'H'           => 'Humán',
+            default       => 'unknown',
+        };
+    }
+
 }

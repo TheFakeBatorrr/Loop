@@ -23,7 +23,9 @@ class Ido_applysController extends Controller
     {
         $data = Ido_applys::query()
             ->join('students', 'ido_applys.ido_applys_users_id', '=', 'students.users_id')
+            ->join('users' , 'ido_applys.ido_applys_users_id' , '=' , 'users.id')
             ->where('ido_applys.accepted', 'Pending')
+            ->where('users.role', '!=' , 'Graduated')
             ->select(
                 'ido_applys.id',
                 'ido_applys_users_id',

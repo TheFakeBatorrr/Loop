@@ -6,11 +6,54 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import CsatlakozasModal from './components/CsatlakozasModal'
 import ElnokDashboard from './components/ElnokDashboard'
 import IdosDashboard from './components/IdosDashboard'
+import { FaStar, FaRegStar } from 'react-icons/fa6'
 import type { View, Application } from './components/types'
 
-// ============================================================
-// DASHBOARD FŐ KOMPONENS
-// ============================================================
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface MyReview {
+  id: number
+  name: string       // event neve
+  topic: string
+  date: string
+  review: number     // 1-5 csillag
+  content: string
+}
+
+// ─── Mini star display ────────────────────────────────────────────────────────
+
+function Stars({ value }: { value: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        i <= value
+          ? <FaStar key={i} className="text-yellow-400 text-xs" />
+          : <FaRegStar key={i} className="text-gray-300 text-xs" />
+      ))}
+    </div>
+  )
+}
+
+// ─── Review card ─────────────────────────────────────────────────────────────
+
+function ReviewCard({ review }: { review: MyReview }) {
+  return (
+    <div className="flex flex-col gap-1.5 p-4 rounded-xl border border-gray-100 bg-gray-50">
+      <div className="flex items-start justify-between gap-2">
+        <span className="font-semibold text-sm text-[#171717] leading-tight">{review.name}</span>
+        <Stars value={review.review} />
+      </div>
+      <span className="text-xs text-gray-400">
+        {new Date(review.date).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </span>
+      {review.content && (
+        <p className="text-sm text-gray-500 mt-1 italic">„{review.content}"</p>
+      )}
+    </div>
+  )
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function DashboardContent() {
   const { user, authFetch } = useAuth()
@@ -22,6 +65,8 @@ function DashboardContent() {
   const [profileData, setProfileData] = useState<{ fullName: string; osztaly: string } | null>(null)
   const [application, setApplication] = useState<Application | null>(null)
   const [applicationLoading, setApplicationLoading] = useState(true)
+  const [myReviews, setMyReviews] = useState<MyReview[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
 
   const isIDO = user?.role === 'Idos' || user?.role === 'President'
   const isElnok = user?.role === 'President'
@@ -33,6 +78,19 @@ function DashboardContent() {
     if (response.status === 404) setApplication(null)
     else setApplication(await response.json())
     setApplicationLoading(false)
+  }
+
+  const fetchMyReviews = async () => {
+    if (!user) return
+    setReviewsLoading(true)
+    try {
+      const res = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ertekeles/myreviews/${user.id}`)
+      if (res.ok) setMyReviews(await res.json())
+    } catch (err) {
+      console.error('Reviews fetch error:', err)
+    } finally {
+      setReviewsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -48,6 +106,12 @@ function DashboardContent() {
   useEffect(() => {
     if (!user || isIDO) return
     fetchApplication()
+  }, [user])
+
+  // Reviews betöltése — minden user láthatja a sajátját
+  useEffect(() => {
+    if (!user) return
+    fetchMyReviews()
   }, [user])
 
   useEffect(() => {
@@ -81,10 +145,7 @@ function DashboardContent() {
       )
     }
 
-    if(user.role === 'Graduated')
-      return(
-        <div></div>
-      )
+    if (user.role === 'Graduated') return <div />
 
     if (application?.accepted === 'Pending') {
       return (
@@ -117,9 +178,36 @@ function DashboardContent() {
           </button>
         </div>
       </div>
-      
     )
   }
+
+  // ─── Reviews panel ──────────────────────────────────────────────────────────
+
+  const renderReviewsPanel = (limit?: number) => {
+    if (reviewsLoading) {
+      return (
+        <div className="flex flex-col gap-3">
+          {[...Array(limit ?? 3)].map((_, i) => (
+            <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+          ))}
+        </div>
+      )
+    }
+
+    if (!myReviews.length) {
+      return <p className="text-gray-400 text-sm italic">Még nincs értékelésed.</p>
+    }
+
+    const displayed = limit ? myReviews.slice(0, limit) : myReviews
+
+    return (
+      <div className="flex flex-col gap-3">
+        {displayed.map(review => <ReviewCard key={review.id} review={review} />)}
+      </div>
+    )
+  }
+
+  // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <main className="min-h-screen bg-[#fafafa] py-10 px-6">
@@ -136,31 +224,38 @@ function DashboardContent() {
           </div>
         </div>
 
+        {/* COMPACT VIEW */}
         {view === 'compact' && (
           <div className="flex flex-col gap-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold text-[#171717] mb-4">Legutóbbi 3 értékelésem</h2>
-              <p className="text-gray-400 text-sm">Még nincs értékelés.</p>
-              <button
-                onClick={() => setView('reviews')}
-                className="mt-4 border-2 border-[#6034e3] text-[#6034e3] px-4 py-2 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all duration-300 w-full"
-              >
-                Több
-              </button>
+              <h2 className="text-lg font-bold text-[#171717] mb-4">Legutóbbi értékeléseim</h2>
+              {renderReviewsPanel(3)}
+              {myReviews.length > 0 && (
+                <button
+                  onClick={() => setView('reviews')}
+                  className="mt-4 border-2 border-[#6034e3] text-[#6034e3] px-4 py-2 rounded-xl font-semibold hover:bg-[#6034e3] hover:text-white transition-all duration-300 w-full"
+                >
+                  Összes értékelés ({myReviews.length})
+                </button>
+              )}
             </div>
             {renderIDOPanel()}
           </div>
         )}
 
+        {/* REVIEWS VIEW */}
         {view === 'reviews' && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-[#171717]">Összes értékelésem</h2>
+              <h2 className="text-lg font-bold text-[#171717]">
+                Összes értékelésem
+                <span className="ml-2 text-sm font-normal text-gray-400">({myReviews.length} db)</span>
+              </h2>
               <button onClick={() => setView('compact')} className="text-[#6034e3] font-semibold hover:underline text-sm">
                 ← Vissza
               </button>
             </div>
-            <p className="text-gray-400 text-sm">Még nincs értékelés.</p>
+            {renderReviewsPanel()}
           </div>
         )}
       </div>
@@ -168,9 +263,7 @@ function DashboardContent() {
   )
 }
 
-// ============================================================
-// PAGE EXPORT
-// ============================================================
+// ─── Page export ──────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   return (
