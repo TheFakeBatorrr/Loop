@@ -19,11 +19,6 @@ Boundless egy modern, webalapú platform amely segíti az iskolai diákönkormá
 - Laravel Sanctum (token alapú auth)
 - MySQL
 
-**Deployment**
-- Frontend: [Vercel](https://vercel.com)
-- Backend: [Render](https://render.com)
-- Domain & email: [Rackhost](https://rackhost.hu)
-
 ---
 
 ## Funkciók
