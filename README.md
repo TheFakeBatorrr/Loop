@@ -74,58 +74,6 @@ Boundless/
 
 ---
 
-## Környezeti változók
-
-### Frontend (`.env.local`)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-### Backend (`.env`)
-```env
-APP_URL=http://localhost:8000
-FRONTEND_URL=http://localhost:3000
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=loop_db
-DB_USERNAME=root
-DB_PASSWORD=
-
-MAIL_MAILER=smtp
-MAIL_HOST=...
-MAIL_PORT=587
-MAIL_USERNAME=...
-MAIL_PASSWORD=...
-MAIL_FROM_ADDRESS=noreply@boundless.hu
-
-SANCTUM_STATEFUL_DOMAINS=localhost:3000
-```
-
----
-
-## Fejlesztői indítás
-
-### Frontend
-```bash
-cd FrontEnd/loopfrontend
-npm install
-npm run dev
-```
-
-### Backend
-```bash
-cd BackEnd
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate
-php artisan serve
-```
-
----
-
 ## Készítette
 
 Szakmai vizsgaprojekt — 2025/2026-os tanév
