@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Loop",
+  title: "Boundless",
   description: "A diákok rendszere",
 };
 
