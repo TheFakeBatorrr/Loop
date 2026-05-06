@@ -8,7 +8,7 @@ type View = 'choice' | 'register' | 'login' | 'profile'
 
 export default function Login() {
     const router = useRouter()
-    const { user, login: authLogin, logout: authLogout, token } = useAuth()
+    const { user, login: authLogin, logout: authLogout, token, authFetch } = useAuth()
 
     const [view, setView] = useState<View>('choice')
     const [showFirstLoginPopup, setShowFirstLoginPopup] = useState(false)
@@ -23,17 +23,44 @@ export default function Login() {
     const [fullName, setFullName] = useState("")
     const [osztaly, setOsztaly] = useState("")
 
+    const [idoEvents, setIdoEvents] = useState<any[]>([])
+    const [idoProfileOpen, setIdoProfileOpen] = useState(false)
+
     const canLogin = email !== "" && password !== ""
     const canRegister = email !== "" && password !== "" && username !== "" && password_confirmation !== ""
 
     useEffect(() => {
         if (user) {
+            if (user.role === 'Admin') {
+                router.push('/admin')
+                return
+            }
             setView('profile')
             const saved = localStorage.getItem('userProfile')
             if (saved) setProfileData(JSON.parse(saved))
         }
     }, [user])
 
+    useEffect(() => {
+        if (!user) return
+
+        const fetchIdoEvents = async () => {
+            const response = await authFetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/staff/ido-profil/${user.id}`
+            )
+
+            if (!response.ok) return
+
+            const data = await response.json()
+            setIdoEvents(data)
+        }
+
+        if (user.role === 'Idos' || user.role === 'President' || user.role === "Graduate") {
+            fetchIdoEvents()
+        }
+    }, [user])
+
+    // Sima fetch — login előtt még nincs token
     const userLogin = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
             method: 'POST',
@@ -43,8 +70,7 @@ export default function Login() {
             },
             body: JSON.stringify({ email, password, device_name: 'web' }),
         })
-        const data = await response.json()
-        
+
         if (!response.ok) {
             alert('Helytelen email vagy jelszó!')
             setPassword("")
@@ -52,11 +78,27 @@ export default function Login() {
             return
         }
 
+        const data = await response.json()
+
+        // Email nincs verifikálva
+        if (!data.users.email_verified_at) {
+            authLogin(data.token, data.users)
+            router.push('/main/verify-email?pending=1')
+            return
+        }
+
         authLogin(data.token, data.users)
+
+        if (data.users.role === 'Admin') {
+            router.push('/admin')
+            return
+        }
 
         await checkFirstLogin(data.users.id, data.token)
     }
 
+    // checkFirstLogin — token már megvan de authFetch state még nem frissült,
+    // ezért itt még direktben adjuk át a tokent
     const checkFirstLogin = async (userId: number, token: string) => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student/${userId}`, {
             headers: {
@@ -76,6 +118,7 @@ export default function Login() {
         }
     }
 
+    // Sima fetch — regisztráció előtt nincs token
     const userRegister = async () => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, {
             method: 'POST',
@@ -93,25 +136,23 @@ export default function Login() {
         }
 
         authLogin(data.token, data.diak)
-        setShowFirstLoginPopup(true)
+        router.push('/main/verify-email?pending=1')
     }
 
-
+    // authFetch — token már megvan (regisztráció után)
     const handlePopupSubmit = async () => {
         const [class_year, class_letter] = osztaly.split('.')
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
+        const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL}/api/student`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 users_id: user?.id,
-                name: fullName, 
-                class_number: parseInt(class_year), 
-                class_letter: class_letter 
+                name: fullName,
+                class_number: parseInt(class_year),
+                class_letter: class_letter
             })
         })
 
@@ -124,12 +165,10 @@ export default function Login() {
         setProfileData({ fullName, osztaly })
         setShowFirstLoginPopup(false)
         router.push('/main')
-    }   
+    }
 
     const handleLogout = () => {
         authLogout()
-        localStorage.removeItem('userProfile')
-        localStorage.removeItem('hasLoggedInBefore')
         setView('choice')
     }
 
@@ -153,7 +192,7 @@ export default function Login() {
                             type="text"
                             placeholder="Osztályod (pl. 12.A)"
                             value={osztaly}
-                            onChange={e => setOsztaly(e.target.value)}
+                            onChange={e => setOsztaly(e.target.value.toUpperCase())}
                             className="border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-[#6034e3] transition-all"
                         />
                         <button
@@ -217,11 +256,18 @@ export default function Login() {
                         Bejelentkezés
                     </button>
                     <button
-                        onClick={() => { setView('register'); setEmail(''); setPassword(''); setUsername('');setPassword_confirmation('') }}
+                        onClick={() => { setView('register'); setEmail(''); setPassword(''); setUsername(''); setPassword_confirmation('') }}
                         style={{ color: "white" }}
                         className="py-2 rounded-xl border-white border w-fit mx-auto px-3"
                     >
                         Először regisztrálok
+                    </button>
+                    <button
+                        onClick={() => {setEmail(''); setPassword(''); setUsername(''); setPassword_confirmation(''); router.push('/forgot-password') }}
+                        style={{ color: "white" }}
+                        className="py-2 rounded-xl border-white border w-fit mx-auto px-3"
+                    >
+                        Elfelejtett jelszó
                     </button>
                 </div>
             )}
@@ -288,33 +334,71 @@ export default function Login() {
                     <h1 className="text-3xl font-black text-center text-white">
                         Szia, {profileData?.fullName ?? 'Ismeretlen'}!
                     </h1>
-                    <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-                        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
-                            <span className="text-gray-500 text-sm font-semibold">Osztály</span>
-                            <span className="font-bold text-[#171717]">{profileData?.osztaly ?? '-'}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-500 text-sm font-semibold">Leadott értékelések</span>
-                            <span className="font-bold text-[#171717]">3 db</span>
-                        </div>
-                    </div>
-                    <div className="bg-[#111111] rounded-2xl p-6 flex flex-col gap-3">
-                        <p className="text-white font-black text-lg mb-1">IDÖ profil</p>
-                        <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                            <span className="text-white/60 text-sm font-semibold">Staff részvételek</span>
-                            <span className="font-bold text-white">7 db</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-white/60 text-sm font-semibold">IDÖ-s évek</span>
-                            <span className="font-bold text-white">2 év</span>
-                        </div>
-                    </div>
+                    <p className="font-black text-center text-white">{profileData?.osztaly}</p>
+
                     <button
                         onClick={() => router.push('/dashboard?tab=reviews')}
                         className="bg-white text-[#6034e3] font-bold py-3 rounded-xl hover:bg-white/80 transition-all duration-300"
                     >
                         Értékeléseim
                     </button>
+
+                    {(user?.role === 'Idos' || user?.role === 'President' || user?.role === "Graduate") && (
+                        <div className="bg-[#111111] rounded-2xl p-6 flex flex-col gap-3">
+                            <button
+                                onClick={() => setIdoProfileOpen(!idoProfileOpen)}
+                                className="flex items-center justify-between text-left"
+                            >
+                                <div>
+                                    <p className="text-white font-black text-lg">
+                                        IDÖ profil
+                                    </p>
+
+                                    <p className="text-white/70 text-sm mt-1">
+                                        {user?.role === 'President'
+                                            ? 'IDÖ elnök 👑'
+                                            : user?.role === 'Idos'
+                                            ? 'IDÖ tag'
+                                            : user?.role}
+                                    </p>
+                                </div>
+
+                                <span className="text-white text-xl">
+                                    {idoProfileOpen ? '−' : '+'}
+                                </span>
+                            </button>
+
+                            {idoProfileOpen && (
+                                <div className="flex flex-col gap-3 pt-2">
+                                    {idoEvents.length > 0 ? (
+                                        idoEvents.map((event) => (
+                                            <div
+                                                key={event.id}
+                                                className="border border-white/10 rounded-xl p-4"
+                                            >
+                                                <p className="text-white font-semibold">
+                                                    {event.name}
+                                                </p>
+
+                                                <p className="text-white/60 text-sm mt-1">
+                                                    {event.date}
+                                                </p>
+
+                                                <p className="text-white/80 text-sm mt-2">
+                                                    {event.user_event_role}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-white/60 text-sm">
+                                            Nincs még kapcsolódó esemény.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <button
                         onClick={handleLogout}
                         className="border-2 border-red-400 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-400 hover:text-white transition-all duration-300"
@@ -323,6 +407,6 @@ export default function Login() {
                     </button>
                 </div>
             )}
-        </main>
+                    </main>
     )
 }

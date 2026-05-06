@@ -13,8 +13,8 @@ class Ido_events extends Model
     protected $table = "ido_events";
 
     protected $fillable = [
-        "ido_events_id",
-        "main_organizer_id",
+        "ido_event_id",
+        "main_organiser_id",
         "revenue",
         "expanses"
     ];

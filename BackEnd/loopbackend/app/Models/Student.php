@@ -16,7 +16,7 @@ class Student extends Model
         "class_letter"
     ];
 
-    public function diak(){
-        return $this->belongsTo(User::class);
+    public function user(){
+        return $this->belongsTo(User::class , 'users_id');
     }
 }

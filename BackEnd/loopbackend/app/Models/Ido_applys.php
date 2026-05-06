@@ -17,7 +17,8 @@ class Ido_applys extends Model
         "accepted"
     ];
 
-    public function diak(){
-        return $this->belongsTo(User::class);
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'ido_applys_users_id');
     }
 }

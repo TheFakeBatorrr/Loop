@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\CustomVerifyEmail;
+use App\Notifications\CustomResetPassword;
 
 use App\Models\Review;
 
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens; //kell a creatToken()-hez
 
@@ -57,7 +60,7 @@ class User extends Authenticatable
         ];
     }
 
-     public function review(){
+    public function review(){
         return $this->belongsToMany(Review::class);
     }
 
@@ -65,4 +68,27 @@ class User extends Authenticatable
         return $this->belongsTo(Staff::class);
     }
 
+    public function apply(){
+        return $this->hasMany(Ido_applys::class);
+    }
+
+    public function student()
+    {
+        return $this->hasOne(Student::class, 'users_id', 'id');
+    }
+
+
+
+
+    
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail());
+    }
+
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new CustomResetPassword($token));
+    }
 }

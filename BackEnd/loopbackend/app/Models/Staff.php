@@ -12,8 +12,8 @@ class Staff extends Model
     protected $table = "staff";
 
     protected $fillable = [
-        "staff_users_id",
-        "staff_events_id",
+        "staff_user_id",
+        "staff_event_id",
         "role",
         "accepted"
     ];

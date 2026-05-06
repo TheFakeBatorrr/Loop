@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId("staff_user_id")->constrained("users");
             $table->foreignId("staff_event_id")->constrained("events");
             $table->string("role");
-            $table->boolean("accepted")->default(0);
+            $table->boolean("accepted")->nullable()->default(null);
             $table->timestamps();
         });
     }

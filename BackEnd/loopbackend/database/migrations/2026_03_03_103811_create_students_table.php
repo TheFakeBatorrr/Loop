@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId("users_id")->constrained("users");
             $table->string("name");
-            $table->integer("class_number");
-            $table->string("class_letter");
+            $table->integer("class_number")->nullable();
+            $table->string("class_letter")->nullable();
             $table->timestamps();
         });
     }

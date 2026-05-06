@@ -77,7 +77,7 @@ export default function SelloutPage() {
         </div>
         <div className="relative z-10 animate-[fadeInUp_0.8s_ease_forwards]">
           <p className="text-white/70 text-lg mb-4 tracking-widest uppercase">Bemutatkozik a</p>
-          <h1 className="text-6xl md:text-8xl font-black mb-6">Loop</h1>
+          <h1 className="text-6xl md:text-8xl font-black mb-6">Boundless</h1>
           <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto mb-10">
             A diákönkormányzat digitális otthona. Egy platform, ahol minden diák hangja számít.
           </p>
@@ -108,7 +108,7 @@ export default function SelloutPage() {
       <section id="features" className="py-24 px-6 max-w-6xl mx-auto">
         <AnimatedSection className="text-center mb-16">
           <p className="text-[#6034e3] font-semibold tracking-widest uppercase mb-2">Mi is ez?</p>
-          <h2 className="text-4xl md:text-5xl font-black">A Loop nem csak egy weboldal.</h2>
+          <h2 className="text-4xl md:text-5xl font-black">A Boundless nem csak egy weboldal.</h2>
         </AnimatedSection>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -132,10 +132,10 @@ export default function SelloutPage() {
       <section className="bg-[#6034e3] py-24 px-6">
         <div className="max-w-4xl mx-auto text-center text-white">
           <AnimatedSection>
-            <p className="tracking-widest uppercase text-white/70 mb-4">Miért Loop?</p>
+            <p className="tracking-widest uppercase text-white/70 mb-4">Miért Boundless?</p>
             <h2 className="text-4xl md:text-5xl font-black mb-6">Mert a diákoknak is jár egy modern platform.</h2>
             <p className="text-white/80 text-lg max-w-2xl mx-auto mb-12">
-              Más iskolák már digitálisan szervezik a diákéletet. Ne maradj le — a Loop minden iskolában működik, és ingyenes.
+              Más iskolák már digitálisan szervezik a diákéletet. Ne maradj le — a Boundless minden iskolában működik, és ingyenes.
             </p>
           </AnimatedSection>
           <div className="grid md:grid-cols-2 gap-6 text-left">
@@ -166,7 +166,7 @@ export default function SelloutPage() {
           {[
             { step: '01', title: 'Kapcsolatfelvétel', desc: 'Írj nekünk és egyeztetünk az iskolád igényeiről.' },
             { step: '02', title: 'Beállítás', desc: 'Mi beállítjuk a platformot az iskolátok adataival.' },
-            { step: '03', title: 'Élesítés', desc: 'A diákok regisztrálnak és a Loop elkezd működni.' },
+            { step: '03', title: 'Élesítés', desc: 'A diákok regisztrálnak és a Boundless elkezd működni.' },
           ].map((item, i) => (
             <AnimatedSection key={i}>
               <div className="relative">
@@ -186,7 +186,7 @@ export default function SelloutPage() {
         <AnimatedSection>
           <h2 className="text-4xl md:text-5xl font-black mb-6">Készen állsz?</h2>
           <p className="text-white/80 text-lg max-w-xl mx-auto mb-10">
-            Hozd el a Loop-ot a te iskoládba is. Vedd fel velünk a kapcsolatot még ma.
+            Hozd el a Boundless-t a te iskoládba is. Vedd fel velünk a kapcsolatot még ma.
           </p>
           <a href="mailto:info@loop.hu"
             className="border-2 border-white text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-[#6034e3] hover:rounded-[30px] transition-all duration-500 inline-block">

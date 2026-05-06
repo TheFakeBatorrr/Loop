@@ -14,7 +14,44 @@ class UserController extends Controller
     public function index()
     {
         $diak = User::all();
-        return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);
+        return response()->json($diak, 200, options:JSON_UNESCAPED_UNICODE);   
+    }
+
+    public function getMembers()
+    {
+        $staff = User::query()
+        ->join('students' , 'users.id' , '=' , 'students.users_id' )
+        ->where('role','Idos')
+        ->select(
+            'users.id',
+            'users.email',
+            'students.name',
+            'students.class_number',
+            'students.class_letter',
+        )
+        ->get();
+
+        return response()->json($staff, 200, options:JSON_UNESCAPED_UNICODE);
+
+    }
+
+    public function getPresident()
+    {
+        $staff = User::query()
+        ->join('students' , 'users.id' , '=' , 'students.users_id' )
+        ->where('role','President')
+        ->select(
+            'users.id',
+            'users.role',
+            'users.email',
+            'students.name',
+            'students.class_number',
+            'students.class_letter',
+        )
+        ->get();
+
+        return response()->json($staff, 200, options:JSON_UNESCAPED_UNICODE);
+
     }
 
     /**
@@ -23,7 +60,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "email" => "required|string|",
+            "email" => "required|string|email",
             "username" => "required|string|max:255",
             "password" => "required|min:8",
             "role" =>  "string|max:20"
@@ -41,7 +78,7 @@ class UserController extends Controller
 
         return response()->json([
             "uzenet"=> "Sikeres diák feltöltés!",
-        ],200, options:JSON_UNESCAPED_UNICODE);
+        ],201, options:JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -57,7 +94,28 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+
+    }
+
+    public function newPresident($id)
+    {
+        // Ha van jelenlegi elnök, visszaminősítjük Idos-ra
+        $oldpres = User::where('role', 'President')->first();
+        if ($oldpres) {
+            $oldpres->role = 'Idos';
+            $oldpres->save();
+            $oldpres->tokens()->delete();
+        }
+
+        $newpres = User::findOrFail($id);
+        if ($newpres->role !== 'Idos') {
+            return response()->json(['uzenet' => 'Csak IDÖ tag lehet elnök!'], 422, options: JSON_UNESCAPED_UNICODE);
+        }
+        $newpres->role = 'President';
+        $newpres->save();
+        $newpres->tokens()->delete();
+
+        return response()->json(['uzenet' => 'Elnöki pozíció átadva!'], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**
@@ -67,10 +125,16 @@ class UserController extends Controller
     {
         $diak = User::find($id);
 
+        if (!$diak) {
+            return response()->json([
+                "uzenet" => "A felhasználó nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
         $diak->delete();
 
         return response()->json([
             "uzenet" => "Sikeres törlés!",
-        ],201, options:JSON_UNESCAPED_UNICODE);
+        ], 200, options: JSON_UNESCAPED_UNICODE); 
     }
 }

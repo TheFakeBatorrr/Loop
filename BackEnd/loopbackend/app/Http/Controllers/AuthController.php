@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Testing\Fluent\Concerns\Has;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -25,11 +27,14 @@ class AuthController extends Controller
             "password" => $request->password
         ]);
 
+        $user->sendEmailVerificationNotification();
+
         $token = $user->createToken($request->device_name)->plainTextToken;
 
         return response()->json([
+            "message" => "Regisztráció sikeres! Ellenőrizd az emailed!",
             "token" => $token,
-            "diak" => $user
+            "user" => $user
         ], 201);
     }
 
@@ -45,7 +50,7 @@ class AuthController extends Controller
         $user = User::where("email", $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(["message" => "Gatya tesó, próbáld máshogy!"], 401);
+            return response()->json(["message" => "Gatya tesó, próbáld máshogy!"], 401 , options:JSON_UNESCAPED_UNICODE);
         }
 
         $token = $user->createToken($request->device_name)->plainTextToken;
@@ -62,6 +67,39 @@ class AuthController extends Controller
 
         return response()->json([
             "message" => "Sikeres kijelentkezés!"
-        ], 200);
+        ], 200 , options:JSON_UNESCAPED_UNICODE);
+    }
+
+
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        return $status === Password::ResetLinkSent
+            ? response()->json(['message' => 'Reset link elküldve!'], 200)
+            : response()->json(['message' => 'Hiba történt!'], 400);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill(['password' => $password])->save();
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PasswordReset
+            ? response()->json(['message' => 'Jelszó sikeresen megváltoztatva!'], 200)
+            : response()->json(['message' => 'Érvénytelen token!'], 400);
     }
 }

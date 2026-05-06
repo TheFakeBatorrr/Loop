@@ -23,10 +23,10 @@ class Ido_eventsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "ido_events_id" => "required|exists:events,id",
-            "main_organizer_id" => "required|exists:users,id",
-            "revenue" => "required|string",
-            "expanses" => "required|string|",     
+            "ido_event_id" => "required|exists:events,id",
+            "main_organiser_id" => "nullable|exists:users,id",
+            "revenue" => "string",
+            "expanses" => "string",     
         ],
         [
             "required" => ":attribute megadása kötelező!",
@@ -58,7 +58,36 @@ class Ido_eventsController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            "main_organiser_id" => "integer|exists:users,id",
+            "revenue" => "string",
+            "expanses" => "string",     
+        ],
+        [
+            "exists" => ":attribute nem létezik ilyen felhasználó!",
+            "required" => ":attribute megadása kötelező!",
+            "string"   => ":attribute mező szöveges lehet csak!",
+        ]);
+
+        $ido_events = Ido_events::where('ido_event_id', $id)->first();
+
+        if (!$ido_events) {
+            return response()->json([
+                "uzenet" => "Az IDÖ esemény nem található!"
+            ], 404, options: JSON_UNESCAPED_UNICODE);
+        }
+
+        $ido_events->fill(array_filter([
+            'main_organiser_id' => $request->main_organiser_id,
+            'revenue'           => $request->revenue,
+            'expanses'          => $request->expanses,
+        ], fn($v) => !is_null($v)));
+
+        $ido_events->save();
+
+        return response()->json([
+            "uzenet" => "Be/Ki-adások megváltoztatva!"
+        ], 200, options: JSON_UNESCAPED_UNICODE);
     }
 
     /**

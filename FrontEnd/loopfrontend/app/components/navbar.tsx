@@ -17,9 +17,9 @@ export default function Navbar() {
   const {user} = useAuth()
 
   const links = [
-  { href: '/main', label: 'Loop' },
+  { href: '/main', label: 'Főoldal' },
   ...(user ? [{ href: '/dashboard', label: 'Irányítópult' }] : []),
-  { href: '/sellout', label: 'Ismerd meg a Loop-ot' },
+  { href: '/sellout', label: 'A Boundless-ről' },
 ]
   
   return (
@@ -28,7 +28,7 @@ export default function Navbar() {
 
         {/* Logo balra */}
         <Link href="/">
-          <Image src={Logo} priority alt="Loop logo" height={55} width={55} />
+          <Image src={Logo} alt="Boundless logo" height={55} width={55} />
         </Link>
 
         {/* Linkek középen */}
@@ -47,9 +47,9 @@ export default function Navbar() {
 
         {/* Login gomb jobbra */}
         <div className="hidden md:flex ml-auto">
-          <button className='mx-3 bg-[#6034e3] rounded-xl p-2' onClick={toggle}>
+          {/*<button className='mx-3 bg-[#6034e3] rounded-xl p-2' onClick={toggle}>
             {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+          </button>*/}
           {user ? 
           (
             <Link
@@ -97,9 +97,9 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <button className='bg-[#6034e3] rounded-xl  mx-auto w-12 p-2' onClick={toggle}>
+          {/*  <button className='bg-[#6034e3] rounded-xl  mx-auto w-12 p-2' onClick={toggle}>
             {theme === 'light' ? '🌙' : '☀️'}
-          </button>
+          </button>  */}
           {user ? 
           (
             <Link
