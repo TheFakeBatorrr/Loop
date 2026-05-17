@@ -10,10 +10,10 @@ class ElnokSeeder extends Seeder
 {
     public function run()
     {
-        User::create([
+        User::firstOrCreate([
             'username' => 'elnok',
             'email' => 'elnok@loop.hu',
-            'password' => Hash::make('elnok1234'),
+            'password' => Hash::make('12345678'),
             'email_verified_at' => now(),
             'role' => 'President'
         ]);
