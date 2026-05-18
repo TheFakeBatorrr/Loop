@@ -46,6 +46,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error('Érvénytelen szerver válasz.')
     }
 
+    if(user.role != 'Idos' && user.role != 'President')
+    {
+      throw new Error('NO_ACCESS')
+    }
+
     await saveToken(token)
     setState({ user, token, isLoading: false })
   }, [])

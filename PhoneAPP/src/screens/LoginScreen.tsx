@@ -59,10 +59,14 @@ export default function LoginScreen() {
     try {
       await login(email.trim(), password)
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-        'Sikertelen bejelentkezés. Ellenőrizd az adataidat.'
-      )
+        if(err?.message == 'NO_ACCESS')
+        {
+          setError('Ez az alkalmazás kizárólag IDÖ tagok számára érhető el!');
+        }
+        else
+        {
+          setError(err?.response?.data?.message || 'Sikertelen bejelentkezés!')
+        }
     } finally {
       setLoading(false)
     }

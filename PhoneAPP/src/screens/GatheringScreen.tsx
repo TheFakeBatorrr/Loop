@@ -214,10 +214,12 @@ function EsemenyKartya({
   event,
   userId,
   isElnok,
+  onRefresh,
 }: {
   event: Event
   userId: number
   isElnok: boolean
+  onRefresh: () => void
 }) {
   const [open, setOpen] = useState(false)
   const [sajatJelentkezes, setSajatJelentkezes] = useState<StaffApplication | null>(null)
@@ -231,10 +233,8 @@ function EsemenyKartya({
     isElnok && (event.type === 'ido_only' || event.type === 'school_ido')
 
   const fetchStaff = useCallback(async () => {
-    console.log('fetch staff hívás')
     try {
       const res = await api.get(`/staff/event/${event.id}`)
-      console.log('fetch staff:', res.data)
       setStaffList(res.data)
     } catch {
       setStaffList([])
@@ -301,7 +301,25 @@ function EsemenyKartya({
     }
   }
 
-  const accentColor = isElnok ? colors.primaryLight : colors.primary
+  const isDraft = event.status === 'draft'
+  const accentColor = isDraft ? '#22c55e' : (isElnok ? colors.primaryLight : colors.primary)
+
+  // Next status gomb label
+  const nextStatusLabel = isDraft
+    ? 'Követkző státusz →'
+    : event.status === 'staff_gathering' && isElnok
+    ? 'Lezárás → Jóváhagyásra küldés'
+    : null
+
+  const handleNextStatus = async () => {
+    try {
+      await api.patch(`/esemeny/${event.id}/next-status`)
+      setOpen(false)
+      onRefresh()
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Hiba történt a státusz frissítésekor.')
+    }
+  }
 
   // Pending jelentkezők száma — badge-hez
   const pendingCount = staffList.filter(s => s.accepted === null).length
@@ -326,8 +344,14 @@ function EsemenyKartya({
               <Text style={styles.pendingBadgeText}>{pendingCount}</Text>
             </View>
           )}
+          {/* Draft badge */}
+          {isDraft && (
+            <View style={[styles.autoBadge, { borderColor: '#22c55e' }]}>
+              <Text style={[styles.autoBadgeText, { color: '#22c55e' }]}>TERVEZET</Text>
+            </View>
+          )}
           {/* Automatikus főszervező badge */}
-          {elnokAutomatikusFoszervezo && (
+          {elnokAutomatikusFoszervezo && !isDraft && (
             <View style={[styles.autoBadge, { borderColor: colors.warning }]}>
               <Text style={[styles.autoBadgeText, { color: colors.warning }]}>👑 Főszervező</Text>
             </View>
@@ -365,8 +389,20 @@ function EsemenyKartya({
             </View>
           )}
 
+          {/* Next-status gomb — elnöknek draft és staff_gathering eventeknél */}
+          {isElnok && nextStatusLabel && (
+            <TouchableOpacity
+              style={[styles.nextStatusBtn, { borderColor: accentColor }]}
+              onPress={handleNextStatus}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.nextStatusBtnText, { color: accentColor }]}>{nextStatusLabel}</Text>
+              <Ionicons name="arrow-forward" size={14} color={accentColor} />
+            </TouchableOpacity>
+          )}
+
           {/* ── ELNÖK NÉZET — minden staff ── */}
-          {isElnok && (
+          {isElnok && !isDraft && (
             <View style={styles.staffBlock}>
               <Text style={styles.staffBlockTitle}>
                 Staff jelentkezők
@@ -495,17 +531,28 @@ export default function GatheringScreen() {
     setError(null)
     try {
       const res = await api.get('/esemeny')
-      const filtered = res.data.filter(
-        (e: Event) => e.status === 'staff_gathering' && e.type !== 'external'
-      )
-      setEvents(filtered)
+      if (isElnok) {
+        // Elnök: staff_gathering (nem external) + saját draft eventek
+        const filtered = res.data.filter(
+          (e: Event) =>
+            (e.status === 'staff_gathering' && e.type !== 'external') ||
+            (e.status === 'draft' && e.type !== 'external')
+        )
+        setEvents(filtered)
+      } else {
+        // Idos: csak staff_gathering
+        const filtered = res.data.filter(
+          (e: Event) => e.status === 'staff_gathering' && e.type !== 'external'
+        )
+        setEvents(filtered)
+      }
     } catch {
       setError('Nem sikerült betölteni az eseményeket.')
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [])
+  }, [isElnok])
 
   useEffect(() => { fetchEvents() }, [])
 
@@ -571,6 +618,7 @@ export default function GatheringScreen() {
               event={item}
               userId={user!.id}
               isElnok={isElnok}
+              onRefresh={fetchEvents}
             />
           )}
         />
@@ -668,4 +716,10 @@ const styles = StyleSheet.create({
 
   empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
   emptyText: { fontSize: 14, color: colors.textMuted },
+  nextStatusBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 11, borderRadius: 10, borderWidth: 1,
+    backgroundColor: '#0a1a0a',
+  },
+  nextStatusBtnText: { fontSize: 13, fontWeight: '700' },
 })

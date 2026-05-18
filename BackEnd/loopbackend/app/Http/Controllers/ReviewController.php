@@ -21,7 +21,7 @@ class ReviewController extends Controller
         return response()->json($Review, 200, options:JSON_UNESCAPED_UNICODE);
     }
 
-    public function getMyReviews($id)
+    public function getMyReviews(string $id)
     {
         $myReviwes = Review::query()
         ->join('events' , 'reviews.reviews_event_id' , '=' , 'events.id')
